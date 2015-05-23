@@ -1,5 +1,20 @@
 2nd Term Final Project    
+5/23/15    
+Updates:    
+- Added player class    
+- Added mob class    
+- Added movement for player (currently in 4 directions until jump is implemented)    
+- Added player detection of a mob hitbox    
 
+Need to do:    
+- Jumping     
+- mob detection of a player hitbox
+- mob and player HP    
+- set paths for mobs    
+- sprites    
+- the level    
+- music    
+- polishing
 
 5/22/15 (Initial Setup)
 Roadmap of goals:    
