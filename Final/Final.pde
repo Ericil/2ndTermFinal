@@ -3,7 +3,9 @@ import java.util.*;
 boolean keyUp, keyDown, keyLeft, keyRight;//for movement of the player
 boolean canUp, canDown, canLeft, canRight;//if the player can move in that direction
 ArrayList<Mob> currentmobs;//the mobs that will be spawned
-Player theplayer = new Player(100, 100);//player
+Player theplayer = new Player(100, 400);//player
+int floor = 400;
+int spd = 0;
 void setup() {
   size(800, 500);
   rectMode(CENTER);
@@ -18,8 +20,12 @@ void draw() {
 }
 
 void playermovements(){//movement of player
-  if(keyUp && playerinteractions(0)){//up
+  /*if(keyUp && playerinteractions(0)){//up
     theplayer.sety(theplayer.gety() - 5);
+  }*/
+  if (spd > 0 || theplayer.gety() < floor){
+    theplayer.sety(theplayer.gety() - spd);
+    spd--;
   }
   if(keyDown && playerinteractions(1)){//down
     theplayer.sety(theplayer.gety() + 5);
@@ -112,8 +118,9 @@ boolean playerinteractions(int a){
 }
 
 void keyPressed(){
-  if (keyCode == 38){
-    keyUp = true;
+  if (keyCode == 38 && theplayer.gety() >= floor){
+    //keyUp = true;
+    spd = 15;
   }
   if (keyCode == 37){
     keyLeft = true;
