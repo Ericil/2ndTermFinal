@@ -1,6 +1,7 @@
 import java.io.*;
 import java.util.*;
 boolean keyUp, keyDown, keyLeft, keyRight;//for movement of the player
+boolean canUp, canDown, canLeft, canRight;//if the player can move in that direction
 ArrayList<Mob> currentmobs;//the mobs that will be spawned
 Player theplayer = new Player(100, 100);//player
 void setup() {
@@ -45,48 +46,71 @@ void enemymovements(){// this is for one mob right now, later on,
       currentmobs.get(a).setmovement(false);
     }
     print(currentmobs.get(a).getx() + " ");
-    if(currentmobs.get(a).getmovement() == true){
+    if(currentmobs.get(a).getmovement() && mobinteractions(a, 2)){
       currentmobs.get(a).setx(currentmobs.get(a).getx()-1);
-    }else{
+    }else if(mobinteractions(a, 3)){
       currentmobs.get(a).setx(currentmobs.get(a).getx()+1);
     }
   }
 }
-boolean playerinteractions(int a){//interaction of the player and other objects
+
+boolean mobinteractions(int a, int b){
   boolean trigger = true;
-  if(a == 0){
-    for(int b = 0; b < currentmobs.size(); b++){
-      if(dist(theplayer.getx(), theplayer.gety(), currentmobs.get(b).getx(), currentmobs.get(b).gety()) <= 25){
-        trigger = false;
-      }
+  if (b == 0){//up
+    if(dist(currentmobs.get(a).getx(), currentmobs.get(a).gety(), theplayer.getx(), theplayer.gety()) <= 25 && currentmobs.get(a).gety() < theplayer.gety()){
+      trigger = false;
     }
   }
-  if(a == 1){
-    for(int b = 0; b < currentmobs.size(); b++){
-      if(dist(theplayer.getx(), theplayer.gety(), currentmobs.get(b).getx(), currentmobs.get(b).gety()) <= 25){
-        trigger = false;
-      }
+  if (b == 1){//down
+    if(dist(currentmobs.get(a).getx(), currentmobs.get(a).gety(), theplayer.getx(), theplayer.gety()) <= 25 && currentmobs.get(a).gety() > theplayer.gety()){
+      trigger = false;
     }
   }
-  if(a == 2){
-    for(int b = 0; b < currentmobs.size(); b++){
-      if(dist(theplayer.getx(), theplayer.gety(), currentmobs.get(b).getx(), currentmobs.get(b).gety()) <= 25){
-        trigger = false;
-      }
+  if (b == 2){//left
+    if(dist(currentmobs.get(a).getx(), currentmobs.get(a).gety(), theplayer.getx(), theplayer.gety()) <= 25 && currentmobs.get(a).getx() > theplayer.getx()){
+      trigger = false;
     }
   }
-  if(a == 3){
-    for(int b = 0; b < currentmobs.size(); b++){
-      if(dist(theplayer.getx(), theplayer.gety(), currentmobs.get(b).getx(), currentmobs.get(b).gety()) <= 25){
-        trigger = false;
-      }
+  if (b == 3){//right
+    if(dist(currentmobs.get(a).getx(), currentmobs.get(a).gety(), theplayer.getx(), theplayer.gety()) <= 25 && currentmobs.get(a).getx() < theplayer.getx()){
+      trigger = false;
     }
   }
-  
-  
   return trigger;
 }
-  
+boolean playerinteractions(int a){
+  boolean trigger = true;
+  if (a == 0){//up
+    for(int b = 0; b < currentmobs.size(); b++){
+      if(dist(theplayer.getx(), theplayer.gety(), currentmobs.get(b).getx(), currentmobs.get(b).gety()) <= 25 && currentmobs.get(b).gety() < theplayer.gety()){
+        trigger = false;
+      }
+    }
+  }
+  if (a == 1){//down
+    for(int b = 0; b < currentmobs.size(); b++){
+      if(dist(theplayer.getx(), theplayer.gety(), currentmobs.get(b).getx(), currentmobs.get(b).gety()) <= 25 && currentmobs.get(b).gety() > theplayer.gety()){
+        trigger = false;
+      }
+    }
+  }
+  if (a == 2){//left
+    for(int b = 0; b < currentmobs.size(); b++){
+      if(dist(theplayer.getx(), theplayer.gety(), currentmobs.get(b).getx(), currentmobs.get(b).gety()) <= 25 && currentmobs.get(b).getx() < theplayer.getx()){
+        trigger = false;
+      }
+    }
+  }
+  if (a == 3){//right
+    for(int b = 0; b < currentmobs.size(); b++){
+      if(dist(theplayer.getx(), theplayer.gety(), currentmobs.get(b).getx(), currentmobs.get(b).gety()) <= 25 && currentmobs.get(b).getx() > theplayer.getx()){
+        trigger = false;
+      }
+    }
+  }
+  return trigger;
+}
+
 void keyPressed(){
   if (keyCode == 38){
     keyUp = true;
