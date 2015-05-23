@@ -2,8 +2,7 @@ class Player{
   int x;
   int y;
   Player(){
-    x = 50;
-    y = 50;
+    this(100, 100);
   }
   Player(int a, int b){
     x = a;
