@@ -3,18 +3,23 @@ import java.util.*;
 boolean keyUp, keyDown, keyLeft, keyRight;//for movement of the player
 boolean canUp, canDown, canLeft, canRight;//if the player can move in that direction
 ArrayList<Mob> currentmobs;//the mobs that will be spawned
-Player theplayer = new Player(100, 400);//player
-int floor = 400;
+ArrayList<Terrain> theterrain; //the terrain
+Player theplayer = new Player(100, 350);//player
+boolean onfloor;
 int spd = 0;
 void setup() {
+  onfloor = false;
   size(800, 500);
   rectMode(CENTER);
   currentmobs = new ArrayList<Mob>();
+  theterrain = new ArrayList<Terrain>();
+  generateterrain();
   currentmobs.add(new Mob());//one mob for right now
 }
 
 void draw() {
   background(255);
+  displayterrain();
   enemymovements();//movement of the enemies
   playermovements();//movement of the player
 }
@@ -23,13 +28,23 @@ void playermovements(){//movement of player
   /*if(keyUp && playerinteractions(0)){//up
     theplayer.sety(theplayer.gety() - 5);
   }*/
-  if (spd > 0 || theplayer.gety() < floor){
+  println("spd: " + spd + ", player interaction up: " + playerinteractions(0) + ", player interaction down: " + playerinteractions(1) + ", on the floor?: " + onfloor);
+  if (spd >= 0 && playerinteractions(0)== true){//jumping, going up
+    onfloor = false;
     theplayer.sety(theplayer.gety() - spd);
     spd--;
+  }else if (spd < 0 && playerinteractions(1) == true){//jumping, going down
+    theplayer.sety(theplayer.gety() - spd);
+    spd--;
+  }else if (playerinteractions(0) == false){//jumping, interactions with entities above
+    spd = -1;
+    theplayer.sety(theplayer.gety() - spd);
   }
+  /*
   if(keyDown && playerinteractions(1)){//down
     theplayer.sety(theplayer.gety() + 5);
   }
+  */
   if(keyLeft && playerinteractions(2)){//left
     theplayer.setx(theplayer.getx() - 5);
   }
@@ -51,7 +66,6 @@ void enemymovements(){// this is for one mob right now, later on,
     if (currentmobs.get(a).getx() == 100){
       currentmobs.get(a).setmovement(false);
     }
-    print(currentmobs.get(a).getx() + " ");
     if(currentmobs.get(a).getmovement() && mobinteractions(a, 2)){
       currentmobs.get(a).setx(currentmobs.get(a).getx()-1);
     }else if(mobinteractions(a, 3)){
@@ -87,40 +101,82 @@ boolean mobinteractions(int a, int b){
 boolean playerinteractions(int a){
   boolean trigger = true;
   if (a == 0){//up
-    for(int b = 0; b < currentmobs.size(); b++){
+    for(int b = 0; b < currentmobs.size(); b++){//mobs above
       if(dist(theplayer.getx(), theplayer.gety(), currentmobs.get(b).getx(), currentmobs.get(b).gety()) <= 25 && currentmobs.get(b).gety() < theplayer.gety()){
+        trigger = false;
+      }
+    }
+    for (int b = 0; b < theterrain.size(); b++){//terrain above
+      if(dist(theplayer.getx(), theplayer.gety(), theterrain.get(b).getx(), theterrain.get(b).gety()) <= 25 && theterrain.get(b).gety() < theplayer.gety()){
         trigger = false;
       }
     }
   }
   if (a == 1){//down
-    for(int b = 0; b < currentmobs.size(); b++){
+    for(int b = 0; b < currentmobs.size(); b++){//mobs below
       if(dist(theplayer.getx(), theplayer.gety(), currentmobs.get(b).getx(), currentmobs.get(b).gety()) <= 25 && currentmobs.get(b).gety() > theplayer.gety()){
         trigger = false;
       }
     }
+    for(int b = 0; b < theterrain.size(); b++){//terrain below
+      if(dist(theplayer.getx(), theplayer.gety(), theterrain.get(b).getx(), theterrain.get(b).gety()) <= 25 && theterrain.get(b).gety() > theplayer.gety()){
+        trigger = false;
+        onfloor = true;
+      }
+    }
   }
   if (a == 2){//left
-    for(int b = 0; b < currentmobs.size(); b++){
+    for(int b = 0; b < currentmobs.size(); b++){//mobs to the left
       if(dist(theplayer.getx(), theplayer.gety(), currentmobs.get(b).getx(), currentmobs.get(b).gety()) <= 25 && currentmobs.get(b).getx() < theplayer.getx()){
         trigger = false;
       }
     }
+    /*
+    for (int b = 0; b < theterrain.size(); b++){//terrain to the left
+      if(dist(theplayer.getx(), theplayer.gety(), theterrain.get(b).getx(), theterrain.get(b).gety()) <= 25 && theterrain.get(b).getx() < theplayer.getx()){
+        trigger = false;
+      }
+    }
+    */
   }
   if (a == 3){//right
-    for(int b = 0; b < currentmobs.size(); b++){
+    for(int b = 0; b < currentmobs.size(); b++){//mobs to the right
       if(dist(theplayer.getx(), theplayer.gety(), currentmobs.get(b).getx(), currentmobs.get(b).gety()) <= 25 && currentmobs.get(b).getx() > theplayer.getx()){
         trigger = false;
       }
     }
+    /*
+    for (int b = 0; b < theterrain.size(); b++){//terrain to the right
+      if(dist(theplayer.getx(), theplayer.gety(), theterrain.get(b).getx(), theterrain.get(b).gety()) <= 25 && theterrain.get(b).getx() > theplayer.getx()){
+        trigger = false;
+      }
+    }
+    */
   }
   return trigger;
 }
 
+void generateterrain(){//making the terrain
+  for(int a = 0; a < width; a++){
+    theterrain.add(new Terrain(a, 400));
+  }
+  for(int a = 300; a < 350; a++){
+    theterrain.add(new Terrain(a, 300));
+  }
+}
+
+void displayterrain(){//drawing the terrain
+  fill(255);
+  for(int a = 0; a < theterrain.size(); a++){
+    rect(theterrain.get(a).getx(), theterrain.get(a).gety(), 25, 25);
+  }
+  fill(0);
+}
 void keyPressed(){
-  if (keyCode == 38 && theplayer.gety() >= floor){
-    //keyUp = true;
+  if (keyCode == 38 && onfloor){
+    keyUp = true;
     spd = 15;
+    onfloor = false;
   }
   if (keyCode == 37){
     keyLeft = true;
