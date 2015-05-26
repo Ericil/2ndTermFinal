@@ -1,4 +1,21 @@
 2nd Term Final Project    
+
+5/25/15    
+Updates:    
+- Added terrain class    
+- Removed movement in up and down    
+- Implemented jump    
+- Added mod detection of a player    
+- Added player detection of terrain(only for above and below right now)    
+
+Need to do:    
+- mob and player HP    
+- set paths for mobs    
+- sprites    
+- the level    
+- music    
+- polishing    
+
 5/23/15    
 Updates:    
 - Added player class    
