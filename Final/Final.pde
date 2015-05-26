@@ -36,7 +36,7 @@ void playermovements(){//movement of player
   }else if (spd < 0 && playerinteractions(1) == true){//jumping, going down
     theplayer.sety(theplayer.gety() - spd);
     spd--;
-  }else if (playerinteractions(0) == false){//jumping, interactions with entities above
+  }else if (playerinteractions(0) == false && onfloor == false  ){//jumping, interactions with entities above
     spd = -1;
     theplayer.sety(theplayer.gety() - spd);
   }
@@ -131,13 +131,13 @@ boolean playerinteractions(int a){
         trigger = false;
       }
     }
-    /*
+    
     for (int b = 0; b < theterrain.size(); b++){//terrain to the left
-      if(dist(theplayer.getx(), theplayer.gety(), theterrain.get(b).getx(), theterrain.get(b).gety()) <= 25 && theterrain.get(b).getx() < theplayer.getx()){
+      if(dist(theplayer.getx(), theplayer.gety(), theterrain.get(b).getx(), theterrain.get(b).gety()) <= 20 && theterrain.get(b).getx() < theplayer.getx()){
         trigger = false;
       }
     }
-    */
+    
   }
   if (a == 3){//right
     for(int b = 0; b < currentmobs.size(); b++){//mobs to the right
@@ -145,32 +145,35 @@ boolean playerinteractions(int a){
         trigger = false;
       }
     }
-    /*
+    
     for (int b = 0; b < theterrain.size(); b++){//terrain to the right
-      if(dist(theplayer.getx(), theplayer.gety(), theterrain.get(b).getx(), theterrain.get(b).gety()) <= 25 && theterrain.get(b).getx() > theplayer.getx()){
+      if(dist(theplayer.getx(), theplayer.gety(), theterrain.get(b).getx(), theterrain.get(b).gety()) <= 20 && theterrain.get(b).getx() > theplayer.getx()){
         trigger = false;
       }
     }
-    */
+    
   }
   return trigger;
 }
 
 void generateterrain(){//making the terrain
-  for(int a = 0; a < width; a++){
+  for(float a = 0; a < width; a = a + .5){
     theterrain.add(new Terrain(a, 400));
   }
-  for(int a = 300; a < 350; a++){
+  for(float a = 300; a < 350; a = a + .5){
     theterrain.add(new Terrain(a, 300));
+  }
+  for(float a = 350; a < 400; a = a + .5){
+    theterrain.add(new Terrain(500., a));
   }
 }
 
 void displayterrain(){//drawing the terrain
-  fill(255);
+  fill(0);
   for(int a = 0; a < theterrain.size(); a++){
     rect(theterrain.get(a).getx(), theterrain.get(a).gety(), 25, 25);
   }
-  fill(0);
+  fill(255);
 }
 void keyPressed(){
   if (keyCode == 38 && onfloor){
