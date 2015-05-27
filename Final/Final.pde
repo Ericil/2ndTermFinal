@@ -3,26 +3,25 @@ import java.util.*;
 boolean keyUp, keyDown, keyLeft, keyRight;//for movement of the player
 boolean canUp, canDown, canLeft, canRight;//if the player can move in that direction
 ArrayList<Mob> currentmobs;//the mobs that will be spawned
-ArrayList<Terrain> theterrain; //the terrain
-Stack<Integer> startx, endx, starty, endy;
+ArrayList<Integer> startx, endx, starty, endy;
 Player theplayer = new Player(100, 350);//player
 boolean onfloor;
 int spd = 0;
 void setup() {
-  startx = new Stack<Integer>();
-  endx = new Stack<Integer>();
-  starty = new Stack<Integer>();
-  endy =  new Stack<Integer>();
-  onfloor = false;
+  startx = new ArrayList<Integer>();
+  endx = new ArrayList<Integer>();
+  starty = new ArrayList<Integer>();
+  endy =  new ArrayList<Integer>();
+  onfloor = true;
   size(800, 500);
   rectMode(CENTER);
   currentmobs = new ArrayList<Mob>();
-  theterrain = new ArrayList<Terrain>();
   generateterrain();
   currentmobs.add(new Mob());//one mob for right now
 }
 
 void draw() {
+  println("\nCycle");
   background(255);
   displayterrain();
   enemymovements();//movement of the enemies
@@ -30,37 +29,28 @@ void draw() {
 }
 
 void playermovements() {//movement of player
-  /*if(keyUp && playerinteractions(0)){//up
-   theplayer.sety(theplayer.gety() - 5);
-   }*/
-  if (spd >= 0 && playerinteractions(0)== true) {//jumping, going up
+  println("0: " + playerinteractions(0) + ", 1: " + playerinteractions(1) + ", " + spd + " ,playerx: " + theplayer.getx() + " ,playery: " + theplayer.gety());
+  if (spd >= 0 && playerinteractions(0) == true) {//jumping, going up
+    println("up");
     onfloor = false;
     theplayer.sety(theplayer.gety() - spd);
     spd--;
-    println("going up\t");
-  } else if (spd < 0 && playerinteractions(1) == true) {//jumping, going down
-    for(int a = 0; a <theterrain.size(); a++){
-      println("trigger 1");
-      if (theplayer.gety() - spd + 12 > theterrain.get(a).gety() && abs(theplayer.getx() - theterrain.get(a).getx()) < 25){
-        println("trigger2");
-        theplayer.sety((int)theterrain.get(a).gety());
-        spd = 0;
-      }
-      println(spd);
-    }
+  }else if (spd < 0 && playerinteractions(1) == true) {//jumping, going down
+    println("down");
     theplayer.sety(theplayer.gety() - spd);
     spd--;
     println("going down\t");
-  } else if (playerinteractions(0) == false && onfloor == false  ) {//jumping, interactions with entities above
+  }else if (playerinteractions(0) == false && onfloor == false) {//jumping, interactions with entities above
+    println("up collison");
     theplayer.sety(theplayer.gety() - spd);
         spd = -1;
         println("hit\t");
+  }else if (playerinteractions(1) == false){
+    println("down collison");
+    onfloor = true;
+    spd = 0;
+    settingy();
   }
-  /*
-  if(keyDown && playerinteractions(1)){//down
-   theplayer.sety(theplayer.gety() + 5);
-   }
-   */
   if (keyLeft && playerinteractions(2)) {//left
     theplayer.setx(theplayer.getx() - 5);
   }
@@ -122,10 +112,8 @@ boolean playerinteractions(int a) {
         trigger = false;
       }
     }
-    for (int b = 0; b < theterrain.size (); b++) {//terrain above
-      if (dist(theplayer.getx(), theplayer.gety(), theterrain.get(b).getx(), theterrain.get(b).gety()) <= 25 && theterrain.get(b).gety() < theplayer.gety()) {
-        trigger = false;
-      }
+    if(terrainint(0)){
+      trigger = false;
     }
   }
   if (a == 1) {//down
@@ -134,11 +122,8 @@ boolean playerinteractions(int a) {
         trigger = false;
       }
     }
-    for (int b = 0; b < theterrain.size (); b++) {//terrain below
-      if (dist(theplayer.getx(), theplayer.gety(), theterrain.get(b).getx(), theterrain.get(b).gety()) <= 25 && theterrain.get(b).gety() > theplayer.gety()) {
-        trigger = false;
-        onfloor = true;
-      }
+    if(terrainint(1)){
+      trigger = false;
     }
   }
   if (a == 2) {//left
@@ -147,11 +132,8 @@ boolean playerinteractions(int a) {
         trigger = false;
       }
     }
-
-    for (int b = 0; b < theterrain.size (); b++) {//terrain to the left
-      if (dist(theplayer.getx(), theplayer.gety(), theterrain.get(b).getx(), theterrain.get(b).gety()) <= 20 && theterrain.get(b).getx() < theplayer.getx()) {
-        trigger = false;
-      }
+    if(terrainint(2)){
+      trigger = false;
     }
   }
   if (a == 3) {//right
@@ -160,53 +142,41 @@ boolean playerinteractions(int a) {
         trigger = false;
       }
     }
-
-    for (int b = 0; b < theterrain.size (); b++) {//terrain to the right
-      if (dist(theplayer.getx(), theplayer.gety(), theterrain.get(b).getx(), theterrain.get(b).gety()) <= 20 && theterrain.get(b).getx() > theplayer.getx()) {
-        trigger = false;
-      }
+    if(terrainint(3)){
+      trigger = false;
     }
   }
   return trigger;
 }
 
 void generateterrain() {//making the terrain
-  for (float a = 0; a < width; a = a + .5) {
-    theterrain.add(new Terrain(a, 400));
-  }
-  
-  startx.push(0);
-  endx.push(width);
-  starty.push(400);
-  endy.push(400);
-  
-  for (float a = 300; a < 350; a = a + .5) {
-    theterrain.add(new Terrain(a, 300));
-  }
-  startx.push(300);
-  endx.push(350);
-  starty.push(300);
-  endy.push(300);
-  for (float a = 350; a < 400; a = a + .5) {
-    theterrain.add(new Terrain(500., a));
-  }
-  startx.push(500);
-  endx.push(500);
-  starty.push(350);
-  endy.push(400);
+  helpergenterrain(0, width, 400, 400);
+  helpergenterrain(300, 350, 300, 300);
+  helpergenterrain(500, 500, 350, 400);
 }
 
+void helpergenterrain(int a, int b, int c, int d){
+  startx.add(a);
+  endx.add(b);
+  starty.add(c);
+  endy.add(d);
+}
 void displayterrain() {
   //drawing the terrain
   
   fill(0);
-  for (int a = 0; a < theterrain.size (); a++) {
-    rect(theterrain.get(a).getx(), theterrain.get(a).gety(), 25, 25);
+  for (int a = 0; a < startx.size(); a++) {
+    if(endy.get(a).equals(starty.get(a))){
+      rect((endx.get(a)+startx.get(a))/2, endy.get(a), endx.get(a)-startx.get(a), 20);
+    }else{
+      rect(endx.get(a), (endy.get(a)+starty.get(a))/2, 20, endy.get(a)-starty.get(a));
+    }
   }
   fill(255);
 }
 void keyPressed() {
   if (keyCode == 38 && onfloor) {
+        println("up pressed");
     keyUp = true;
     spd = 15;
     onfloor = false;
@@ -236,4 +206,57 @@ void keyReleased() {
     keyDown = false;
   }
 }
-
+void settingy(){
+  int holdx = theplayer.getx();
+  int holdy = theplayer.gety();
+    if ((holdx >= 0 && holdx <= 300) || (holdx >= 350 && holdx <= 490) || (holdx >= 510 && holdx <= 800)){
+      theplayer.sety(380);
+    }
+    if ((holdx >= 300 && holdx <= 350)){
+      println("undercover");
+      if(holdy <= 280){
+        theplayer.sety(280);
+      }
+      if(holdy >= 300 && holdy <= 400){
+        println("trigger");
+        theplayer.sety(380);
+      }
+    }
+}
+boolean terrainint(int a){
+  boolean trigger = false;
+  int holdx = theplayer.getx();
+  int holdy = theplayer.gety();
+  if(a == 0){
+    if (holdx >= 300 && holdx <= 350){
+      if (holdy == 300){
+        trigger = true;
+      }
+    }
+  }
+  if(a == 1){
+    println("Down: triggering");
+    println(holdx);
+    println(holdx >= 0 && holdx <= 490);
+    if ((holdx >= 0 && holdx <= 300) || (holdx >= 350 && holdx <= 490) || (holdx >= 510 && holdx <= 800)){
+      if (holdy + spd >= 370){
+        println("triggering 2");
+        trigger = true;
+      }
+    }
+    if ((holdx >= 300 && holdx <= 350)){
+      if(holdy <= 280){
+        trigger = true;
+      }
+      if(holdy >= 300 && holdy <= 400){
+        trigger = true;
+      }
+    }
+    if ((holdx >= 490 && holdx <= 510)){
+      if (holdy == 350){
+        trigger = true;
+      }
+    }
+  }
+  return trigger;
+}
