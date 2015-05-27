@@ -1,5 +1,40 @@
 2nd Term Final Project    
 
+5/27/15    
+Updates:    
+- removed terrain class    
+- removed previous way of interaction    
+- redid terrain generation (works)    
+- redid player-terrain interaction (skeleton there, doesn’t really work)    
+- tried to fix jump, getting complicated    
+
+Need to do:    
+- sprites    
+- level    
+- mob paths    
+- mob and player HP    
+- music    
+- polishing    
+
+Notes:    
+- might want to fix boolean values in my playerinteraction function or make it return a string to make it easier to understand    
+
+5/26/15    
+Updates:    
+- continued on player-terrain interaction    
+- tried to fix going through the floor, much better than before    
+
+Need to do:    
+- sprites    
+- level    
+- mob paths    
+- mob and player HP    
+- music    
+- polishing    
+
+Notes:    
+- want to redo the way terrain works, currently lags because I generate a terrain item every .5 of a coord    
+
 5/25/15    
 Updates:    
 - Added terrain class    
