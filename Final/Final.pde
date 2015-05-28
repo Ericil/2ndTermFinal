@@ -8,11 +8,12 @@ Player theplayer = new Player(100, 350);//player
 boolean onfloor;
 int spd = 0;
 void setup() {
+  frameRate(60);
   startx = new ArrayList<Integer>();
   endx = new ArrayList<Integer>();
   starty = new ArrayList<Integer>();
   endy =  new ArrayList<Integer>();
-  onfloor = true;
+  onfloor = false;
   size(800, 500);
   rectMode(CENTER);
   currentmobs = new ArrayList<Mob>();
@@ -21,7 +22,8 @@ void setup() {
 }
 
 void draw() {
-  println("\nCycle");
+  //////println("\nCycle");
+  ////////println(mouseX + "," +mouseY);
   background(255);
   displayterrain();
   enemymovements();//movement of the enemies
@@ -29,27 +31,27 @@ void draw() {
 }
 
 void playermovements() {//movement of player
-  println("0: " + playerinteractions(0) + ", 1: " + playerinteractions(1) + ", " + spd + " ,playerx: " + theplayer.getx() + " ,playery: " + theplayer.gety());
-  if (spd >= 0 && playerinteractions(0) == "no terrain") {//jumping, going up
-    println("up");
+  ////println(onfloor);
+  //println("0: " + playerinteractions(0) + ", 1: " + playerinteractions(1) + ", " + spd + " ,playerx: " + theplayer.getx() + " ,playery: " + theplayer.gety() + " ,projectedy: " + (theplayer.gety() - spd));
+  if (playerinteractions(1) == "no terrain"){
     onfloor = false;
+  }
+  if (spd >= 0 && playerinteractions(0) == "no terrain") {//jumping, going upr
     theplayer.sety(theplayer.gety() - spd);
     spd--;
-  }else if (spd < 0 && playerinteractions(1) == "no terrain") {//jumping, going down
-    println("down");
+  }else if (spd < 0 && playerinteractions(1) == "no terrain" && onfloor == false) {//jumping, going down
     theplayer.sety(theplayer.gety() - spd);
     spd--;
-    println("going down\t");
+    ////println("going down\t");
   }else if (playerinteractions(0) == "terrain" && onfloor == false) {//jumping, interactions with entities above
-    println("up collison");
-    theplayer.sety(theplayer.gety() - spd);
-        spd = -1;
-        println("hit\t");
-  }else if (playerinteractions(1) == "terrain"){
-    println("down collison");
-    onfloor = true;
     spd = 0;
-    settingy();
+    theplayer.sety(theplayer.gety() - spd);
+    spd --;
+  }else if (playerinteractions(1) == "terrain" && onfloor == false){
+    ////println("down collison");
+    onfloor = true;
+        settingy();
+    spd = 0;
   }
   if (keyLeft && playerinteractions(2) == "no terrain") {//left
     theplayer.setx(theplayer.getx() - 5);
@@ -166,17 +168,19 @@ void displayterrain() {
   
   fill(0);
   for (int a = 0; a < startx.size(); a++) {
+    rectMode(CORNER);
     if(endy.get(a).equals(starty.get(a))){
-      rect((endx.get(a)+startx.get(a))/2, endy.get(a), endx.get(a)-startx.get(a), 20);
+      rect(startx.get(a), starty.get(a), endx.get(a)-startx.get(a), 20);
     }else{
-      rect(endx.get(a), (endy.get(a)+starty.get(a))/2, 20, endy.get(a)-starty.get(a));
+      rect(startx.get(a), starty.get(a), 20, endy.get(a)-starty.get(a));
     }
   }
+  rectMode(CENTER);
   fill(255);
 }
 void keyPressed() {
   if (keyCode == 38 && onfloor) {
-        println("up pressed");
+        ////println("up pressed");
     keyUp = true;
     spd = 15;
     onfloor = false;
@@ -209,53 +213,74 @@ void keyReleased() {
 void settingy(){
   int holdx = theplayer.getx();
   int holdy = theplayer.gety();
+  if (terrainint(1) == "terrain"){
     if ((holdx >= 0 && holdx <= 300) || (holdx >= 350 && holdx <= 490) || (holdx >= 510 && holdx <= 800)){
-      theplayer.sety(380);
+      theplayer.sety(390);
     }
-    if ((holdx >= 300 && holdx <= 350)){
-      println("undercover");
-      if(holdy <= 280){
-        theplayer.sety(280);
+    if ((holdx > 290 && holdx <  360)){
+      //////println("undercover");
+      if(holdy - spd >= 280 && holdy - spd <= 300){
+        theplayer.sety(290);
       }
-      if(holdy >= 300 && holdy <= 400){
-        println("trigger");
-        theplayer.sety(380);
+      if(holdy - spd >= 390){
+        //////println("trigger");
+        theplayer.sety(390);
       }
     }
+    if ((holdx > 490 && holdx < 530)){
+      theplayer.sety(340);
+    }
+  }
 }
 String terrainint(int a){
   String trigger = "no terrain";
   int holdx = theplayer.getx();
   int holdy = theplayer.gety();
   if(a == 0){
-    if (holdx >= 300 && holdx <= 350){
-      if (holdy == 300){
+    if (holdx > 290 && holdx < 360){
+      if (holdy - spd <= 320 && holdy - spd >= 300){
         trigger = "terrain";
       }
     }
   }
   if(a == 1){
-    println("Down: triggering");
-    println(holdx);
-    println(holdx >= 0 && holdx <= 490);
-    if ((holdx >= 0 && holdx <= 300) || (holdx >= 350 && holdx <= 490) || (holdx >= 510 && holdx <= 800)){
-      if (holdy + spd >= 370){
-        println("triggering 2");
+    //////println("Down: triggering");
+    //////println(holdx);
+    //////println(holdx >= 0 && holdx <= 300);
+    if ((holdx >= 0 && holdx <= 300) || (holdx >= 350 && holdx <= 350) || (holdx >= 350 && holdx <= 510) || (holdx >= 530 && holdx <= 800)){
+      if (holdy - spd >= 390){
+        //////println("triggering 2");
         trigger = "terrain";
       }
     }
-    if ((holdx >= 300 && holdx <= 350)){
-      if(holdy <= 280){
+    if ((holdx > 290 && holdx < 360)){
+      if(holdy - spd >= 290 && holdy - spd <= 310){
         trigger = "terrain";
       }
-      if(holdy >= 300 && holdy <= 400){
+      if(holdy - spd >= 390 && holdy - spd <= 410){
         trigger = "terrain";
       }
     }
-    if ((holdx >= 490 && holdx <= 510)){
-      if (holdy == 350){
+    if ((holdx > 490 && holdx < 530)){
+      if (holdy - spd >= 340 && holdy - spd < 360){
         trigger = "terrain";
       }
+    }
+  }
+  if (a == 2){//terrain on left
+    if (holdx == 360 && (holdy >= 290 && holdy <= 310)){
+     trigger = "terrain";
+    } 
+    if (holdx == 530 && (holdy >= 340 && holdy <= 390)){
+      trigger = "terrain";
+    }
+  }
+  if (a == 3){//terrain on right
+    if (holdx == 290 && (holdy >= 300 && holdy <= 320)){
+      trigger = "terrain";
+    }
+    if(holdx == 490 && (holdy >= 340 && holdy <= 390)){
+       trigger = "terrain";
     }
   }
   return trigger;
