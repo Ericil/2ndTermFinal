@@ -30,31 +30,31 @@ void draw() {
 
 void playermovements() {//movement of player
   println("0: " + playerinteractions(0) + ", 1: " + playerinteractions(1) + ", " + spd + " ,playerx: " + theplayer.getx() + " ,playery: " + theplayer.gety());
-  if (spd >= 0 && playerinteractions(0) == true) {//jumping, going up
+  if (spd >= 0 && playerinteractions(0) == "no terrain") {//jumping, going up
     println("up");
     onfloor = false;
     theplayer.sety(theplayer.gety() - spd);
     spd--;
-  }else if (spd < 0 && playerinteractions(1) == true) {//jumping, going down
+  }else if (spd < 0 && playerinteractions(1) == "no terrain") {//jumping, going down
     println("down");
     theplayer.sety(theplayer.gety() - spd);
     spd--;
     println("going down\t");
-  }else if (playerinteractions(0) == false && onfloor == false) {//jumping, interactions with entities above
+  }else if (playerinteractions(0) == "terrain" && onfloor == false) {//jumping, interactions with entities above
     println("up collison");
     theplayer.sety(theplayer.gety() - spd);
         spd = -1;
         println("hit\t");
-  }else if (playerinteractions(1) == false){
+  }else if (playerinteractions(1) == "terrain"){
     println("down collison");
     onfloor = true;
     spd = 0;
     settingy();
   }
-  if (keyLeft && playerinteractions(2)) {//left
+  if (keyLeft && playerinteractions(2) == "no terrain") {//left
     theplayer.setx(theplayer.getx() - 5);
   }
-  if (keyRight && playerinteractions(3)) {//right
+  if (keyRight && playerinteractions(3) == "no terrain") {//right
     theplayer.setx(theplayer.getx() + 5);
   }
   rect(theplayer.getx(), theplayer.gety(), 20, 20);//drawing the player
@@ -104,46 +104,46 @@ boolean mobinteractions(int a, int b) {
   }
   return trigger;
 }
-boolean playerinteractions(int a) {
-  boolean trigger = true;
+String playerinteractions(int a) {
+  String trigger = "no terrain";
   if (a == 0) {//up
     for (int b = 0; b < currentmobs.size (); b++) {//mobs above
       if (dist(theplayer.getx(), theplayer.gety(), currentmobs.get(b).getx(), currentmobs.get(b).gety()) <= 25 && currentmobs.get(b).gety() < theplayer.gety()) {
-        trigger = false;
+        trigger = "terrain";
       }
     }
-    if(terrainint(0)){
-      trigger = false;
+    if(terrainint(0) == "terrain"){
+      trigger = "terrain";
     }
   }
   if (a == 1) {//down
     for (int b = 0; b < currentmobs.size (); b++) {//mobs below
       if (dist(theplayer.getx(), theplayer.gety(), currentmobs.get(b).getx(), currentmobs.get(b).gety()) <= 25 && currentmobs.get(b).gety() > theplayer.gety()) {
-        trigger = false;
+        trigger = "terrain";
       }
     }
-    if(terrainint(1)){
-      trigger = false;
+    if(terrainint(1) == "terrain"){
+      trigger = "terrain";
     }
   }
   if (a == 2) {//left
     for (int b = 0; b < currentmobs.size (); b++) {//mobs to the left
       if (dist(theplayer.getx(), theplayer.gety(), currentmobs.get(b).getx(), currentmobs.get(b).gety()) <= 25 && currentmobs.get(b).getx() < theplayer.getx()) {
-        trigger = false;
+        trigger = "terrain";
       }
     }
-    if(terrainint(2)){
-      trigger = false;
+    if(terrainint(2) == "terrain"){
+      trigger = "terrain";
     }
   }
   if (a == 3) {//right
     for (int b = 0; b < currentmobs.size (); b++) {//mobs to the right
       if (dist(theplayer.getx(), theplayer.gety(), currentmobs.get(b).getx(), currentmobs.get(b).gety()) <= 25 && currentmobs.get(b).getx() > theplayer.getx()) {
-        trigger = false;
+        trigger = "terrain";
       }
     }
-    if(terrainint(3)){
-      trigger = false;
+    if(terrainint(3) == "terrain"){
+      trigger = "terrain";
     }
   }
   return trigger;
@@ -223,14 +223,14 @@ void settingy(){
       }
     }
 }
-boolean terrainint(int a){
-  boolean trigger = false;
+String terrainint(int a){
+  String trigger = "no terrain";
   int holdx = theplayer.getx();
   int holdy = theplayer.gety();
   if(a == 0){
     if (holdx >= 300 && holdx <= 350){
       if (holdy == 300){
-        trigger = true;
+        trigger = "terrain";
       }
     }
   }
@@ -241,20 +241,20 @@ boolean terrainint(int a){
     if ((holdx >= 0 && holdx <= 300) || (holdx >= 350 && holdx <= 490) || (holdx >= 510 && holdx <= 800)){
       if (holdy + spd >= 370){
         println("triggering 2");
-        trigger = true;
+        trigger = "terrain";
       }
     }
     if ((holdx >= 300 && holdx <= 350)){
       if(holdy <= 280){
-        trigger = true;
+        trigger = "terrain";
       }
       if(holdy >= 300 && holdy <= 400){
-        trigger = true;
+        trigger = "terrain";
       }
     }
     if ((holdx >= 490 && holdx <= 510)){
       if (holdy == 350){
-        trigger = true;
+        trigger = "terrain";
       }
     }
   }
