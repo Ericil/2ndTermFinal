@@ -7,12 +7,24 @@ ArrayList<Integer> startx, endx, starty, endy;
 Player theplayer = new Player(100, 350);//player
 boolean onfloor;
 int spd = 0;
+ArrayList<PImage> leftwalk, rightwalk, leftjump, rightjump;
+String direction;
+int leftnum, rightnum, leftjumpnum, rightjumpnum;
 void setup() {
   frameRate(60);
   startx = new ArrayList<Integer>();
   endx = new ArrayList<Integer>();
   starty = new ArrayList<Integer>();
   endy =  new ArrayList<Integer>();
+  leftwalk = new ArrayList<PImage>();
+  rightwalk = new ArrayList<PImage>();
+  leftjump = new ArrayList<PImage>();
+  rightjump = new ArrayList<PImage>();
+  leftnum = 0;
+  rightnum = 0;
+  leftjumpnum = 0;
+  rightjumpnum = 0;
+  direction = "right";
   onfloor = false;
   size(800, 500);
   rectMode(CENTER);
@@ -28,6 +40,7 @@ void draw() {
   displayterrain();
   enemymovements();//movement of the enemies
   playermovements();//movement of the player
+  loadplayer();
 }
 
 void playermovements() {//movement of player
@@ -54,12 +67,28 @@ void playermovements() {//movement of player
     spd = 0;
   }
   if (keyLeft && playerinteractions(2) == "no terrain") {//left
+    if (direction != "left"){
+      direction = "left";
+      leftnum = 0;
+    }else if(leftnum == 10){
+      leftnum = 0;
+    }else{
+      leftnum++;
+    }
     theplayer.setx(theplayer.getx() - 5);
   }
   if (keyRight && playerinteractions(3) == "no terrain") {//right
+    if (direction != "right"){
+      direction = "right";
+      rightnum = 0;
+    }else if (rightnum == 10){
+      rightnum = 0;
+    }else{
+      rightnum++;
+    }
     theplayer.setx(theplayer.getx() + 5);
   }
-  rect(theplayer.getx(), theplayer.gety(), 20, 20);//drawing the player
+  //rect(theplayer.getx(), theplayer.gety(), 20, 20);//drawing the player
 }
 
 void enemymovements() {// this is for one mob right now, later on,
@@ -209,6 +238,18 @@ void keyReleased() {
   if (keyCode == 40) {
     keyDown = false;
   }
+}
+
+void loadplayer(){
+  if (direction == "left"){
+    PImage hold = loadImage("left" + leftnum + ".png");
+    image(hold, theplayer.getx() - 10, theplayer.gety() - 25);
+  }
+  if (direction == "right"){
+    PImage hold = loadImage("right" + rightnum + ".png");
+    image(hold, theplayer.getx() - 10, theplayer.gety() - 25);
+  }
+  
 }
 void settingy(){
   int holdx = theplayer.getx();
