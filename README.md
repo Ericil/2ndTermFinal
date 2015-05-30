@@ -1,5 +1,50 @@
 2nd Term Final Project    
 
+5/30/15    
+Updates:    
+- animation for left and right updated, looks a lot better    
+- idle animations done, but the sprites used makes it look wonky    
+- fixed whitespace on sprites    
+
+Need to do:    
+- fixing idle sprites    
+- jump animation    
+- level(s)    
+- mob and boss attacks    
+- mob and boss paths    
+- music    
+- polishing    
+
+5/29/15    
+Updates:    
+- animation for left and right done, looks a bit too fast    
+- added idle sprites    
+
+Need to do:    
+- animation    
+- level(s)    
+- mob paths    
+- mob and player HP    
+- music    
+- polishing    
+
+5/28/15    
+Updates:
+- movement works!!    
+- jump works too!!    
+- added basic sprites    
+- basics for terrain interaction have been set up    
+- basic sprites added    
+
+Need to do:    
+- animation    
+- level    
+- mob paths    
+- mob and player HP    
+- music    
+- polishing    
+
+
 5/27/15    
 Updates:    
 - removed terrain class    
