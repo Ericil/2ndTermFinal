@@ -1,5 +1,6 @@
 import java.io.*;
 import java.util.*;
+int shift;
 boolean keyUp, keyDown, keyLeft, keyRight;//for movement of the player
 boolean canUp, canDown, canLeft, canRight;//if the player can move in that direction
 ArrayList<Mob> currentmobs;//the mobs that will be spawned
@@ -9,8 +10,12 @@ boolean onfloor;
 int spd = 0;
 ArrayList<PImage> leftwalk, rightwalk, leftjump, rightjump;
 String direction;
-int leftnum, rightnum, leftjumpnum, rightjumpnum;
+int leftnum, rightnum, leftjumpnum, rightjumpnum, idlenum;
+boolean idleleft = true;
+boolean idleright = true;
+int intervalleft, intervalright, intervalup, intervaldown, intervalidle;
 void setup() {
+  shift = 0;
   frameRate(60);
   startx = new ArrayList<Integer>();
   endx = new ArrayList<Integer>();
@@ -24,6 +29,10 @@ void setup() {
   rightnum = 0;
   leftjumpnum = 0;
   rightjumpnum = 0;
+  idlenum = 0;
+  intervalleft = 0;
+  intervalright = 0;
+  intervalidle = 0;
   direction = "right";
   onfloor = false;
   size(800, 500);
@@ -67,26 +76,52 @@ void playermovements() {//movement of player
     spd = 0;
   }
   if (keyLeft && playerinteractions(2) == "no terrain") {//left
-    if (direction != "left"){
-      direction = "left";
-      leftnum = 0;
-    }else if(leftnum == 10){
-      leftnum = 0;
-    }else{
-      leftnum++;
-    }
     theplayer.setx(theplayer.getx() - 5);
   }
   if (keyRight && playerinteractions(3) == "no terrain") {//right
-    if (direction != "right"){
-      direction = "right";
-      rightnum = 0;
-    }else if (rightnum == 10){
-      rightnum = 0;
-    }else{
-      rightnum++;
-    }
     theplayer.setx(theplayer.getx() + 5);
+  }
+  if(keyRight){
+    if(intervalright == 3){
+      if (direction != "right"){
+        direction = "right";
+        rightnum = 0;
+      }else if (rightnum == 10){
+        rightnum = 0;
+      }else{
+        rightnum++;
+      }
+      intervalright = 0;
+    }else{
+      intervalright++;
+    }
+  }
+  if(keyLeft){
+    if(intervalleft == 3){
+      if (direction != "left"){
+        direction = "left";
+        leftnum = 0;
+      }else if(leftnum == 10){
+        leftnum = 0;
+      }else{
+        leftnum++;
+      }
+      intervalleft = 0;
+    }else{
+      intervalleft++;
+    }
+  }
+  if(keyUp == false && keyDown == false && keyRight == false && keyLeft == false){
+    if(intervalidle == 10){
+      if(idlenum == 1){
+        idlenum = 0;
+      }else{
+        idlenum = 1;
+      }
+      intervalidle = 0;
+    }else{
+      intervalidle++;
+    }
   }
   //rect(theplayer.getx(), theplayer.gety(), 20, 20);//drawing the player
 }
@@ -216,9 +251,11 @@ void keyPressed() {
   }
   if (keyCode == 37) {
     keyLeft = true;
+    idleleft = false;
   }
   if (keyCode == 39) {
     keyRight = true;
+    idleright = false;
   }
   if (keyCode == 40) {
     keyDown = true;
@@ -231,9 +268,11 @@ void keyReleased() {
   }
   if (keyCode == 37) {
     keyLeft = false;
+    idleleft = true;
   }
   if (keyCode == 39) {
     keyRight = false;
+    idleright = true;
   }
   if (keyCode == 40) {
     keyDown = false;
@@ -241,14 +280,22 @@ void keyReleased() {
 }
 
 void loadplayer(){
-  if (direction == "left"){
+  if (direction == "left" && idleleft == false){
     PImage hold = loadImage("left" + leftnum + ".png");
     image(hold, theplayer.getx() - 10, theplayer.gety() - 25);
   }
-  if (direction == "right"){
+  if (direction == "left" && idleleft == true){
+    PImage hold = loadImage("idleleft" + idlenum + ".png");
+    image(hold, theplayer.getx() - 10, theplayer.gety() - 25);
+  }
+  if (direction == "right" && idleright == false){
     PImage hold = loadImage("right" + rightnum + ".png");
     image(hold, theplayer.getx() - 10, theplayer.gety() - 25);
   }
+  if (direction == "right" && idleright == true){
+    PImage hold = loadImage("idleright" + idlenum + ".png");
+    image(hold, theplayer.getx() - 10, theplayer.gety() - 25);
+  }  
   
 }
 void settingy(){
