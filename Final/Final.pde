@@ -10,10 +10,10 @@ boolean onfloor;
 int spd = 0;
 ArrayList<PImage> leftwalk, rightwalk, leftjump, rightjump;
 String direction;
-int leftnum, rightnum, leftjumpnum, rightjumpnum, idlenum;
+int leftnum, rightnum, jumpnum, idlenum;
 boolean idleleft = true;
 boolean idleright = true;
-int intervalleft, intervalright, intervalup, intervaldown, intervalidle;
+int intervalleft, intervalright, intervalidle;
 void setup() {
   shift = 0;
   frameRate(60);
@@ -27,8 +27,7 @@ void setup() {
   rightjump = new ArrayList<PImage>();
   leftnum = 0;
   rightnum = 0;
-  leftjumpnum = 0;
-  rightjumpnum = 0;
+  jumpnum = 0;
   idlenum = 0;
   intervalleft = 0;
   intervalright = 0;
@@ -72,8 +71,43 @@ void playermovements() {//movement of player
   }else if (playerinteractions(1) == "terrain" && onfloor == false){
     ////println("down collison");
     onfloor = true;
-        settingy();
+    settingy();
     spd = 0;
+  }
+  if(onfloor == false){
+    if (spd == 0){
+      jumpnum = 5;
+    }
+    if (spd == 15){
+      jumpnum = 0;
+    }
+    if (spd < 15 && spd >= 11){
+      jumpnum = 1;
+    }
+    if (spd < 11 && spd >= 7){
+      jumpnum = 2;
+    }
+    if (spd < 7 && spd >= 4){
+      jumpnum = 3;
+    }
+    if (spd < 4 && spd >= 1){
+      jumpnum = 4;
+    }
+    if (spd < 0 && spd >= -4){
+      jumpnum = 6;
+    }
+    if (spd < -4 && spd >= -8){
+      jumpnum = 7;
+    }
+    if (spd < -8 && spd >= -12){
+      jumpnum = 8;
+    }
+    if (spd < -12 && spd >= -16){
+      jumpnum = 9;
+    }
+    if (spd < -16){
+      jumpnum = 10;
+    }
   }
   if (keyLeft && playerinteractions(2) == "no terrain") {//left
     theplayer.setx(theplayer.getx() - 5);
@@ -81,7 +115,7 @@ void playermovements() {//movement of player
   if (keyRight && playerinteractions(3) == "no terrain") {//right
     theplayer.setx(theplayer.getx() + 5);
   }
-  if(keyRight){
+  if(keyRight && onfloor == true){
     if(intervalright == 3){
       if (direction != "right"){
         direction = "right";
@@ -96,7 +130,7 @@ void playermovements() {//movement of player
       intervalright++;
     }
   }
-  if(keyLeft){
+  if(keyLeft && onfloor == true){
     if(intervalleft == 3){
       if (direction != "left"){
         direction = "left";
@@ -111,7 +145,7 @@ void playermovements() {//movement of player
       intervalleft++;
     }
   }
-  if(keyUp == false && keyDown == false && keyRight == false && keyLeft == false){
+  if(keyUp == false && keyDown == false && keyRight == false && keyLeft == false && onfloor == true){
     if(intervalidle == 10){
       if(idlenum == 1){
         idlenum = 0;
@@ -280,22 +314,33 @@ void keyReleased() {
 }
 
 void loadplayer(){
-  if (direction == "left" && idleleft == false){
-    PImage hold = loadImage("left" + leftnum + ".png");
-    image(hold, theplayer.getx() - 10, theplayer.gety() - 25);
+  if (onfloor == true){
+    if (direction == "left" && idleleft == false){
+      PImage hold = loadImage("left" + leftnum + ".png");
+      image(hold, theplayer.getx() - 10, theplayer.gety() - 25);
+    }
+    if (direction == "left" && idleleft == true){
+      PImage hold = loadImage("idleleft" + idlenum + ".png");
+      image(hold, theplayer.getx() - 10, theplayer.gety() - 25);
+    }
+    if (direction == "right" && idleright == false){
+      PImage hold = loadImage("right" + rightnum + ".png");
+      image(hold, theplayer.getx() - 10, theplayer.gety() - 25);
+    }
+    if (direction == "right" && idleright == true){
+      PImage hold = loadImage("idleright" + idlenum + ".png");
+      image(hold, theplayer.getx() - 10, theplayer.gety() - 25);
+    }
+  }else{
+    if (direction == "right"){
+      PImage hold = loadImage("jumpright" + jumpnum + ".png");
+      image(hold, theplayer.getx() - 10, theplayer.gety() - 25);
+    }
+    if (direction == "left"){
+      PImage hold = loadImage("jumpleft" + jumpnum + ".png");
+      image(hold, theplayer.getx() - 10, theplayer.gety() - 25);
+    }
   }
-  if (direction == "left" && idleleft == true){
-    PImage hold = loadImage("idleleft" + idlenum + ".png");
-    image(hold, theplayer.getx() - 10, theplayer.gety() - 25);
-  }
-  if (direction == "right" && idleright == false){
-    PImage hold = loadImage("right" + rightnum + ".png");
-    image(hold, theplayer.getx() - 10, theplayer.gety() - 25);
-  }
-  if (direction == "right" && idleright == true){
-    PImage hold = loadImage("idleright" + idlenum + ".png");
-    image(hold, theplayer.getx() - 10, theplayer.gety() - 25);
-  }  
   
 }
 void settingy(){
@@ -367,7 +412,7 @@ String terrainint(int a){
     if (holdx == 290 && (holdy >= 300 && holdy <= 320)){
       trigger = "terrain";
     }
-    if(holdx == 490 && (holdy >= 340 && holdy <= 390)){
+    if(holdx == 470 && (holdy >= 340 && holdy <= 390)){
        trigger = "terrain";
     }
   }
