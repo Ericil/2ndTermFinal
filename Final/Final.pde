@@ -35,6 +35,7 @@ void setup() {
 
 void starting(){
     theplayer = new Player(100, 350);
+    spd = 0;
     leftnum = 0;
     rightnum = 0;
     jumpnum = 0;
@@ -56,7 +57,6 @@ void draw() {
   ////////println(mouseX + "," +mouseY);
   background(255);
   displayterrain();
- 
   //enemymovements();//movement of the enemies
   playermovements();//movement of the player
   loadplayer();
@@ -351,10 +351,10 @@ void loadplayer(){
 }
 void settingy(){
   //int holdx = theplayer.getx();
-  int holdx = projectedx - shift;
+  int holdx = projectedx;
   int holdy = theplayer.gety();
   if (terrainint(1) == "terrain"){
-    if ((holdx >= 0 && holdx <= 300) || (holdx >= 350 && holdx <= 490) || (holdx >= 510 && holdx <= 800)){
+    if ((holdx >= 0 && holdx <= 300) || (holdx >= 350 && holdx <= 470) || (holdx >= 510 && holdx <= 800) || (holdx >= 900 && holdx <= 2000)){
       theplayer.sety(390);
     }
     if ((holdx > 290 && holdx <  360)){
@@ -367,7 +367,7 @@ void settingy(){
         theplayer.sety(390);
       }
     }
-    if ((holdx > 490 && holdx < 530)){
+    if ((holdx > 470 && holdx < 530)){
       theplayer.sety(340);
     }
   }
@@ -417,7 +417,7 @@ String terrainint(int a){
     //////println("Down: triggering");
     //////println(holdx);
     //////println(holdx >= 0 && holdx <= 300);
-    if ((holdx >= 0 && holdx <= 300) || (holdx >= 350 && holdx <= 510) || (holdx >= 530 && holdx <= 800) || holdx >= 900 && holdx <= 2000){
+    if ((holdx >= 0 && holdx <= 300) || (holdx >= 350 && holdx <= 470) || (holdx >= 530 && holdx <= 800) || holdx >= 900 && holdx <= 2000){
       if (holdy - spd >= 390 && holdy - spd <= 410){
         //////println("triggering 2");
         trigger = "terrain";
@@ -431,8 +431,8 @@ String terrainint(int a){
         trigger = "terrain";
       }
     }
-    if ((holdx > 490 && holdx < 530)){
-      if (holdy - spd >= 340 && holdy - spd < 360){
+    if ((holdx > 470 && holdx < 530)){
+      if (holdy - spd >= 330 && holdy - spd < 350){
         trigger = "terrain";
       }
     }
