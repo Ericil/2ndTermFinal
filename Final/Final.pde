@@ -1,11 +1,10 @@
 import java.io.*;
 import java.util.*;
-int shift;
 boolean keyUp, keyDown, keyLeft, keyRight;//for movement of the player
 boolean canUp, canDown, canLeft, canRight;//if the player can move in that direction
 ArrayList<Mob> currentmobs;//the mobs that will be spawned
 ArrayList<Integer> startx, endx, starty, endy;
-Player theplayer = new Player(100, 350);//player
+Player theplayer;
 boolean onfloor;
 int spd = 0;
 ArrayList<PImage> leftwalk, rightwalk, leftjump, rightjump;
@@ -14,8 +13,9 @@ int leftnum, rightnum, jumpnum, idlenum;
 boolean idleleft = true;
 boolean idleright = true;
 int intervalleft, intervalright, intervalidle;
+int projectedx, projectedy;
+int shift;
 void setup() {
-  shift = 0;
   frameRate(60);
   startx = new ArrayList<Integer>();
   endx = new ArrayList<Integer>();
@@ -25,15 +25,7 @@ void setup() {
   rightwalk = new ArrayList<PImage>();
   leftjump = new ArrayList<PImage>();
   rightjump = new ArrayList<PImage>();
-  leftnum = 0;
-  rightnum = 0;
-  jumpnum = 0;
-  idlenum = 0;
-  intervalleft = 0;
-  intervalright = 0;
-  intervalidle = 0;
-  direction = "right";
-  onfloor = false;
+  starting();
   size(800, 500);
   rectMode(CENTER);
   currentmobs = new ArrayList<Mob>();
@@ -41,17 +33,37 @@ void setup() {
   currentmobs.add(new Mob());//one mob for right now
 }
 
+void starting(){
+    theplayer = new Player(100, 350);
+    leftnum = 0;
+    rightnum = 0;
+    jumpnum = 0;
+    idlenum = 0;
+    intervalleft = 0;
+    intervalright = 0;
+    intervalidle = 0;
+    projectedx = theplayer.getx();
+    projectedy = theplayer.gety();
+    shift = 0;
+    direction = "right";
+    onfloor = false;
+}
 void draw() {
+  if(theplayer.gety() > 700){
+    starting();
+  }
   //////println("\nCycle");
   ////////println(mouseX + "," +mouseY);
   background(255);
   displayterrain();
-  enemymovements();//movement of the enemies
+ 
+  //enemymovements();//movement of the enemies
   playermovements();//movement of the player
   loadplayer();
 }
 
 void playermovements() {//movement of player
+  println(theplayer.getx() + "," + theplayer.gety() + ":" + projectedx + "," + projectedy + ":" + (projectedx - shift));
   ////println(onfloor);
   //println("0: " + playerinteractions(0) + ", 1: " + playerinteractions(1) + ", " + spd + " ,playerx: " + theplayer.getx() + " ,playery: " + theplayer.gety() + " ,projectedy: " + (theplayer.gety() - spd));
   if (playerinteractions(1) == "no terrain"){
@@ -110,10 +122,30 @@ void playermovements() {//movement of player
     }
   }
   if (keyLeft && playerinteractions(2) == "no terrain") {//left
-    theplayer.setx(theplayer.getx() - 5);
+    if(projectedx < 400){
+      theplayer.setx(theplayer.getx() - 5);
+    }else{
+      shift = shift - 5;
+    }
+    projectedx = projectedx - 5;
   }
   if (keyRight && playerinteractions(3) == "no terrain") {//right
-    theplayer.setx(theplayer.getx() + 5);
+    if(projectedx < 400){
+      theplayer.setx(theplayer.getx() + 5);
+    }else{
+      shift = shift + 5;
+    }
+    projectedx = projectedx + 5;
+  }
+  if (keyRight && onfloor == false){
+    if(direction != "right"){
+      direction = "right";
+    }
+  }
+  if (keyLeft && onfloor == false){
+    if(direction != "left"){
+      direction = "left";
+    }
   }
   if(keyRight && onfloor == true){
     if(intervalright == 3){
@@ -146,11 +178,11 @@ void playermovements() {//movement of player
     }
   }
   if(keyUp == false && keyDown == false && keyRight == false && keyLeft == false && onfloor == true){
-    if(intervalidle == 10){
-      if(idlenum == 1){
+    if(intervalidle == 2){
+      if(idlenum == 7){
         idlenum = 0;
       }else{
-        idlenum = 1;
+        idlenum++;
       }
       intervalidle = 0;
     }else{
@@ -160,6 +192,7 @@ void playermovements() {//movement of player
   //rect(theplayer.getx(), theplayer.gety(), 20, 20);//drawing the player
 }
 
+/*
 void enemymovements() {// this is for one mob right now, later on,
   //will store the boundaries of a mob's movement somewhere and access it here, this is just code to have something working
   for (int a = 0; a < currentmobs.size (); a++) {
@@ -179,7 +212,7 @@ void enemymovements() {// this is for one mob right now, later on,
     }
   }
 }
-
+*/
 boolean mobinteractions(int a, int b) {
   boolean trigger = true;
   if (b == 0) {//up
@@ -249,33 +282,6 @@ String playerinteractions(int a) {
   return trigger;
 }
 
-void generateterrain() {//making the terrain
-  helpergenterrain(0, width, 400, 400);
-  helpergenterrain(300, 350, 300, 300);
-  helpergenterrain(500, 500, 350, 400);
-}
-
-void helpergenterrain(int a, int b, int c, int d){
-  startx.add(a);
-  endx.add(b);
-  starty.add(c);
-  endy.add(d);
-}
-void displayterrain() {
-  //drawing the terrain
-  
-  fill(0);
-  for (int a = 0; a < startx.size(); a++) {
-    rectMode(CORNER);
-    if(endy.get(a).equals(starty.get(a))){
-      rect(startx.get(a), starty.get(a), endx.get(a)-startx.get(a), 20);
-    }else{
-      rect(startx.get(a), starty.get(a), 20, endy.get(a)-starty.get(a));
-    }
-  }
-  rectMode(CENTER);
-  fill(255);
-}
 void keyPressed() {
   if (keyCode == 38 && onfloor) {
         ////println("up pressed");
@@ -344,7 +350,8 @@ void loadplayer(){
   
 }
 void settingy(){
-  int holdx = theplayer.getx();
+  //int holdx = theplayer.getx();
+  int holdx = projectedx - shift;
   int holdy = theplayer.gety();
   if (terrainint(1) == "terrain"){
     if ((holdx >= 0 && holdx <= 300) || (holdx >= 350 && holdx <= 490) || (holdx >= 510 && holdx <= 800)){
@@ -365,10 +372,40 @@ void settingy(){
     }
   }
 }
+
+
+void generateterrain() {//making the terrain
+  helpergenterrain(0, width, 400, 400);
+  helpergenterrain(300, 350, 300, 300);
+  helpergenterrain(500, 500, 350, 400);
+  helpergenterrain(900, 2000, 400, 400);
+}
+void helpergenterrain(int a, int b, int c, int d){
+  startx.add(a);
+  endx.add(b);
+  starty.add(c);
+  endy.add(d);
+}
+void displayterrain() {
+  //drawing the terrain
+  
+  fill(0);
+  for (int a = 0; a < startx.size(); a++) {
+    rectMode(CORNER);
+    if(endy.get(a).equals(starty.get(a))){
+      rect(startx.get(a) - shift, starty.get(a), endx.get(a)-startx.get(a), 20);
+    }else{
+      rect(startx.get(a) - shift, starty.get(a), 20, endy.get(a)-starty.get(a));
+    }
+  }
+  rectMode(CENTER);
+  fill(255);
+}
 String terrainint(int a){
   String trigger = "no terrain";
-  int holdx = theplayer.getx();
+  //int holdx = theplayer.getx();
   int holdy = theplayer.gety();
+  int holdx = projectedx;
   if(a == 0){
     if (holdx > 290 && holdx < 360){
       if (holdy - spd <= 320 && holdy - spd >= 300){
@@ -380,8 +417,8 @@ String terrainint(int a){
     //////println("Down: triggering");
     //////println(holdx);
     //////println(holdx >= 0 && holdx <= 300);
-    if ((holdx >= 0 && holdx <= 300) || (holdx >= 350 && holdx <= 350) || (holdx >= 350 && holdx <= 510) || (holdx >= 530 && holdx <= 800)){
-      if (holdy - spd >= 390){
+    if ((holdx >= 0 && holdx <= 300) || (holdx >= 350 && holdx <= 510) || (holdx >= 530 && holdx <= 800) || holdx >= 900 && holdx <= 2000){
+      if (holdy - spd >= 390 && holdy - spd <= 410){
         //////println("triggering 2");
         trigger = "terrain";
       }
