@@ -15,9 +15,17 @@ boolean idleright = true;
 int intervalleft, intervalright, intervalidle;
 int projectedx, projectedy;
 int shift;
+Boss boss = new Boss();
+int timer = 0;
+int counter = 0;
+int counter2 = 0;
+int timer2 = 0;
+boolean bossjump = false;
+boolean bossair = false;
+Random chance = new Random();
 void setup() {
   frameRate(60);
-  startx = new ArrayList<Integer>();
+  /*startx = new ArrayList<Integer>();
   endx = new ArrayList<Integer>();
   starty = new ArrayList<Integer>();
   endy =  new ArrayList<Integer>();
@@ -25,15 +33,15 @@ void setup() {
   rightwalk = new ArrayList<PImage>();
   leftjump = new ArrayList<PImage>();
   rightjump = new ArrayList<PImage>();
-  starting();
+  starting();*/
   size(800, 500);
   rectMode(CENTER);
-  currentmobs = new ArrayList<Mob>();
+  /*currentmobs = new ArrayList<Mob>();
   generateterrain();
-  currentmobs.add(new Mob());//one mob for right now
+  currentmobs.add(new Mob());//one mob for right now*/
 }
 
-void starting(){
+/*void starting(){
     theplayer = new Player(100, 350);
     spd = 0;
     leftnum = 0;
@@ -48,21 +56,22 @@ void starting(){
     shift = 0;
     direction = "right";
     onfloor = false;
-}
+}*/
 void draw() {
-  if(theplayer.gety() > 700){
+  /*if(theplayer.gety() > 700){
     starting();
   }
   //////println("\nCycle");
-  ////////println(mouseX + "," +mouseY);
+  ////////println(mouseX + "," +mouseY);*/
   background(255);
-  displayterrain();
+  /*displayterrain();
   //enemymovements();//movement of the enemies
   playermovements();//movement of the player
-  loadplayer();
+  loadplayer();*/
+  displayBoss();
 }
 
-void playermovements() {//movement of player
+/*void playermovements() {//movement of player
   println(theplayer.getx() + "," + theplayer.gety() + ":" + projectedx + "," + projectedy + ":" + (projectedx - shift));
   ////println(onfloor);
   //println("0: " + playerinteractions(0) + ", 1: " + playerinteractions(1) + ", " + spd + " ,playerx: " + theplayer.getx() + " ,playery: " + theplayer.gety() + " ,projectedy: " + (theplayer.gety() - spd));
@@ -213,7 +222,7 @@ void enemymovements() {// this is for one mob right now, later on,
   }
 }
 */
-boolean mobinteractions(int a, int b) {
+/*boolean mobinteractions(int a, int b) {
   boolean trigger = true;
   if (b == 0) {//up
     if (dist(currentmobs.get(a).getx(), currentmobs.get(a).gety(), theplayer.getx(), theplayer.gety()) <= 25 && currentmobs.get(a).gety() < theplayer.gety()) {
@@ -454,4 +463,70 @@ String terrainint(int a){
     }
   }
   return trigger;
+}
+*/
+void displayBoss(){
+  System.out.println(boss.getx()+","+boss.gety()+" "+boss.getspd());
+  rect(boss.getx(),boss.gety(),30,30);
+  int start = millis();
+  if ((start-timer) > 3000){
+    if (boss.getx() == 700 || boss.getx() == 100){
+      int action;
+      int action2;
+      if (counter < 5){
+        action = chance.nextInt(5-counter);
+        action2 = chance.nextInt(7-counter2);
+      }else{
+        action = 0;
+        action2 = 5;
+      }
+      if (action2 == 0){
+        bossair = true;
+        counter2 = 0;
+      }else if(action == 0){
+        bossjump = true;
+        counter = 0;
+      }
+      System.out.println(bossair+","+bossjump);
+    }
+    if (boss.getside()){
+    boss.setx(boss.getx()-10);
+    }else{
+      boss.setx(boss.getx()+10);
+    }
+    if (bossair){
+      boss.sety(300);
+    }
+    if (bossjump){
+      //if(boss.getspd() == 0 && boss.gety() == 400){
+      //  boss.setspd(30);
+      //}
+      if(boss.gety() == 400){
+        boss.setspd(50);
+      }
+      else{
+        boss.setspd(boss.getspd() - 10);
+      }
+      boss.sety(boss.gety()-boss.getspd());
+    }
+    if (boss.getx() == 100 && boss.getside()){
+      boss.sety(400);
+      boss.switchside();
+      timer = millis();
+      counter++;
+      counter2++;
+      bossair = false;
+      bossjump = false;
+      boss.setspd(0);
+    }else if(boss.getx() == 700 && !boss.getside()){
+      boss.sety(400);
+      boss.switchside();
+      timer = millis();
+      counter++;
+      counter2++;
+      bossair = false;
+      bossjump = false;
+      boss.setspd(0);
+    }
+  }
 }
