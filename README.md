@@ -1,5 +1,35 @@
 2nd Term Final Project    
 
+6/4/15    
+Updates:    
+- added attack animation    
+
+Need to do:    
+- levels    
+- more animations for bosses, mobs, and player    
+- mob and boss attacks    
+- mob and boss paths    
+- music    
+- polishing    
+
+6/1/15    
+Stable demo version is with commit by njason7 on May 31, 2015 “Added more idle sprites”    
+
+Updates:    
+- added movement of screen instead of player moving after a certain point    
+- fixed terrain collision bugs brought on by this new addition    
+- branch by Jason to work on boss algorithms    
+- idle sprites a lot better    
+- jump animation is decent now    
+- added jumping and air dashing for one boss (Jason2 branch)    
+
+Need to do:    
+- levels    
+- mob and boss attacks    
+- mob and boss paths    
+- music    
+- polishing    
+
 5/30/15    
 Updates:    
 - animation for left and right updated, looks a lot better    
