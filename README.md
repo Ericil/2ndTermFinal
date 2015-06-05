@@ -1,4 +1,5 @@
 2nd Term Final Project    
+Group Name: Megaman CS    
 
 6/4/15    
 Updates:    
