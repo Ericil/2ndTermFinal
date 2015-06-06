@@ -4,8 +4,8 @@ boolean keyUp, keyDown, keyLeft, keyRight;//for movement of the player
 boolean atking;
 boolean canUp, canDown, canLeft, canRight;//if the player can move in that direction
 ArrayList<Mob> currentmobs;//the mobs that will be spawned
-ArrayList<Integer> startx, endx, starty, endy;
 Player theplayer;
+int onmapx, onmapy;
 boolean onfloor;
 int spd = 0;
 String direction;
@@ -15,22 +15,43 @@ boolean idleright = true;
 int intervalleft, intervalright, intervalidle, intervalatk;
 int projectedx, projectedy;
 int shift;
+BufferedReader test;
+String[][] themap;
+int movementamountvert, movementamounthorz;
 void setup() {
-  frameRate(60);
-  startx = new ArrayList<Integer>();
-  endx = new ArrayList<Integer>();
-  starty = new ArrayList<Integer>();
-  endy =  new ArrayList<Integer>();
+  onmapx = 0;
+  onmapy = 0;
+  theplayer = new Player();
+  test = createReader("map.txt");
+  String ugh = null;
+  String[] hold = new String[20];
+  try{
+    for(int a = 0; (ugh = test.readLine()) != null; a++){
+      hold[a] = ugh;
+    }
+  }catch(IOException e){
+  }
+  themap = new String[20][32];
+  for(int a = 0; a < hold.length; a++){
+    for(int b = 0; b < 32; b++){
+      themap[a][b] = hold[a].substring(b, b+1);
+      if (themap[a][b].equals("p")){
+        theplayer.setx(b * 25);
+        theplayer.sety(a * 25);
+        onmapx = b;
+        onmapy = a;
+      }
+      }
+    }
   starting();
   size(800, 500);
-  rectMode(CENTER);
   currentmobs = new ArrayList<Mob>();
-  generateterrain();
   currentmobs.add(new Mob());//one mob for right now
 }
 
 void starting(){
-    theplayer = new Player(100, 350);
+    movementamountvert = 25;
+    movementamounthorz = 0;
     spd = 0;
     leftnum = 0;
     rightnum = 0;
@@ -45,15 +66,24 @@ void starting(){
     projectedy = theplayer.gety();
     shift = 0;
     direction = "right";
-    onfloor = false;
+    onfloor = true;
 }
 void draw() {
+  /*
+  for(int a = 0; a < themap.length; a++){
+    for(int b = 0; b < themap[a].length; b++){
+      print(themap[a][b] + " ");
+    }
+    println();
+  }
+  */
+  //println("playerxy: " + theplayer.getx(), theplayer.gety());
+  //println("Cycle");
   if(theplayer.gety() > 700){
     starting();
   }
-  //////println("\nCycle");
-  ////////println(mouseX + "," +mouseY);
   background(255);
+  fill(0);
   displayterrain();
   //enemymovements();//movement of the enemies
   playermovements();//movement of the player
@@ -61,9 +91,6 @@ void draw() {
 }
 
 void playermovements() {//movement of player
-  //println(theplayer.getx() + "," + theplayer.gety() + ":" + projectedx + "," + projectedy + ":" + (projectedx - shift));
-  ////println(onfloor);
-  //println("0: " + playerinteractions(0) + ", 1: " + playerinteractions(1) + ", " + spd + " ,playerx: " + theplayer.getx() + " ,playery: " + theplayer.gety() + " ,projectedy: " + (theplayer.gety() - spd));
   if(atking == true && onfloor){
     if(intervalatk == 3){
       if (atknum == 5){
@@ -81,22 +108,54 @@ void playermovements() {//movement of player
     if (playerinteractions(1) == "no terrain"){
       onfloor = false;
     }
-    if (spd >= 0 && playerinteractions(0) == "no terrain") {//jumping, going upr
+    if (spd > 0 && playerinteractions(0) == "no terrain") {//jumping, going up
       theplayer.sety(theplayer.gety() - spd);
-      spd--;
+      if(movementamountvert - spd <= 0){
+        movementamountvert = movementamountvert - spd + 25;
+        themap[onmapy][onmapx] = "a";
+        onmapy = onmapy - 1;
+        themap[onmapy][onmapx] = "p";
+      }else{
+        movementamountvert = movementamountvert - spd;
+      }
+      if(spd -2 == 0){
+        spd = -2;
+      }else{
+        spd--;
+      }
     }else if (spd < 0 && playerinteractions(1) == "no terrain" && onfloor == false) {//jumping, going down
       theplayer.sety(theplayer.gety() - spd);
+      if(movementamountvert - spd >= 25){
+          movementamountvert = movementamountvert - spd - 25;
+          themap[onmapy][onmapx] = "a";
+          onmapy = onmapy + 1;
+          themap[onmapy][onmapx] = "p";
+      }else{
+        movementamountvert = movementamountvert - spd;
+      }
       spd--;
-      ////println("going down\t");
     }else if (playerinteractions(0) == "terrain" && onfloor == false) {//jumping, interactions with entities above
       spd = 0;
+      movementamountvert = movementamountvert - spd;
       theplayer.sety(theplayer.gety() - spd);
       spd --;
     }else if (playerinteractions(1) == "terrain" && onfloor == false){
-      ////println("down collison");
       onfloor = true;
-      settingy();
+      theplayer.sety(theplayer.gety()/25 * 25 + 25);
       spd = 0;
+      movementamountvert = movementamountvert - spd;
+    }else if (spd == 0 && onfloor == false && playerinteractions(1) == "no terrain"){
+      spd = -1;
+      theplayer.sety(theplayer.gety() - spd);
+      if(movementamountvert - spd >= 25){
+          movementamountvert = movementamountvert - spd - 25;
+          themap[onmapy][onmapx] = "a";
+          onmapy = onmapy + 1;
+          themap[onmapy][onmapx] = "p";
+      }else{
+        movementamountvert = movementamountvert - spd;
+      }
+      spd--;
     }
     if(onfloor == false){
       if (spd == 0){
@@ -140,6 +199,7 @@ void playermovements() {//movement of player
         shift = shift - 5;
       }
       projectedx = projectedx - 5;
+      movementamounthorz = movementamounthorz - 5;
     }
     if (keyRight && playerinteractions(3) == "no terrain") {//right
       if(projectedx < 400){
@@ -148,6 +208,7 @@ void playermovements() {//movement of player
         shift = shift + 5;
       }
       projectedx = projectedx + 5;
+      movementamounthorz = movementamounthorz + 5;
     }
     if (keyRight && onfloor == false){
       if(direction != "right"){
@@ -296,14 +357,12 @@ String playerinteractions(int a) {
 }
 
 void keyPressed() {
-  //println(keyCode);
   if(keyCode == 65 && onfloor){
     atking = true;
   }
   if (keyCode == 38 && onfloor) {
-        ////println("up pressed");
     keyUp = true;
-    spd = 15;
+    spd = 20;
     onfloor = false;
   }
   if (keyCode == 37) {
@@ -337,90 +396,57 @@ void keyReleased() {
 }
 
 void loadplayer(){
+  imageMode(CORNER);
   if (onfloor == true){
     if (direction == "left"){
       if(atking == true){
         PImage hold = loadImage("swordleft" + atknum + ".png");
-        image(hold, theplayer.getx() - 10, theplayer.gety() - 25);
+        image(hold, theplayer.getx(), theplayer.gety() - 10);
       }else if (idleleft == false){
         PImage hold = loadImage("left" + leftnum + ".png");
-        image(hold, theplayer.getx() - 10, theplayer.gety() - 25);
+        image(hold, theplayer.getx(), theplayer.gety() - 10);
       }else if (idleleft == true){
         PImage hold = loadImage("idleleft" + idlenum + ".png");
-        image(hold, theplayer.getx() - 10, theplayer.gety() - 25);
+        image(hold, theplayer.getx(), theplayer.gety() - 10);
       }
       if(atking == true){
         PImage hold = loadImage("swordleft" + atknum + ".png");
-        image(hold, theplayer.getx() - 10, theplayer.gety() - 25);
+        image(hold, theplayer.getx(), theplayer.gety() - 10);
       }
     }
     if (direction == "right"){
       if (atking == true){
         PImage hold = loadImage("swordright" + atknum + ".png");
-        image(hold, theplayer.getx() - 10, theplayer.gety() - 25);
+        image(hold, theplayer.getx() - 20, theplayer.gety() - 10);
       }else{
         if(idleright == false){
         PImage hold = loadImage("right" + rightnum + ".png");
-        image(hold, theplayer.getx() - 10, theplayer.gety() - 25);
+        image(hold, theplayer.getx() - 20, theplayer.gety()  - 10);
         }
         if (idleright == true){
         PImage hold = loadImage("idleright" + idlenum + ".png");
-        image(hold, theplayer.getx() - 10, theplayer.gety() - 25);
+        image(hold, theplayer.getx() - 20, theplayer.gety() - 10);
         }
     }
     }
   }else{
     if (direction == "right"){
       PImage hold = loadImage("jumpright" + jumpnum + ".png");
-      image(hold, theplayer.getx() - 10, theplayer.gety() - 25);
+      image(hold, theplayer.getx() - 25, theplayer.gety() - 10);
     }
     if (direction == "left"){
       PImage hold = loadImage("jumpleft" + jumpnum + ".png");
-      image(hold, theplayer.getx() - 10, theplayer.gety() - 25);
+      image(hold, theplayer.getx(), theplayer.gety() - 10);
     }
   }
   
 }
-void settingy(){
-  //int holdx = theplayer.getx();
-  int holdx = projectedx;
-  int holdy = theplayer.gety();
-  if (terrainint(1) == "terrain"){
-    if ((holdx >= 0 && holdx <= 300) || (holdx >= 350 && holdx <= 470) || (holdx >= 510 && holdx <= 800) || (holdx >= 900 && holdx <= 2000)){
-      theplayer.sety(390);
-    }
-    if ((holdx > 290 && holdx <  360)){
-      //////println("undercover");
-      if(holdy - spd >= 280 && holdy - spd <= 300){
-        theplayer.sety(290);
-      }
-      if(holdy - spd >= 390){
-        //////println("trigger");
-        theplayer.sety(390);
-      }
-    }
-    if ((holdx > 470 && holdx < 530)){
-      theplayer.sety(340);
-    }
-  }
-}
 
 
-void generateterrain() {//making the terrain
-  helpergenterrain(0, width, 400, 400);
-  helpergenterrain(300, 350, 300, 300);
-  helpergenterrain(500, 500, 350, 400);
-  helpergenterrain(900, 2000, 400, 400);
-}
-void helpergenterrain(int a, int b, int c, int d){
-  startx.add(a);
-  endx.add(b);
-  starty.add(c);
-  endy.add(d);
-}
 void displayterrain() {
   //drawing the terrain
   
+  /*
   fill(0);
   for (int a = 0; a < startx.size(); a++) {
     rectMode(CORNER);
@@ -430,7 +456,16 @@ void displayterrain() {
       rect(startx.get(a) - shift, starty.get(a), 20, endy.get(a)-starty.get(a));
     }
   }
-  rectMode(CENTER);
+  */
+  fill(0);
+  rectMode(CORNER);
+  for(int a = 0; a < themap.length; a++){
+    for(int b = 0; b < themap[a].length; b++){
+      if(themap[a][b].equals("x")){
+        rect(b * 25 - shift, a * 25, 25, 25);
+      }
+    }
+  }
   fill(255);
 }
 String terrainint(int a){
@@ -439,50 +474,49 @@ String terrainint(int a){
   int holdy = theplayer.gety();
   int holdx = projectedx;
   if(a == 0){
-    if (holdx > 290 && holdx < 360){
-      if (holdy - spd <= 320 && holdy - spd >= 300){
-        trigger = "terrain";
+    if (movementamountvert - spd <= 0){
+        if (themap[onmapy - 1][onmapx].equals("x")){
+          trigger = "terrain";
+          movementamountvert = 0;
+        }
       }
-    }
   }
   if(a == 1){
-    //////println("Down: triggering");
-    //////println(holdx);
-    //////println(holdx >= 0 && holdx <= 300);
-    if ((holdx >= 0 && holdx <= 300) || (holdx >= 350 && holdx <= 470) || (holdx >= 530 && holdx <= 800) || holdx >= 900 && holdx <= 2000){
-      if (holdy - spd >= 390 && holdy - spd <= 410){
-        //////println("triggering 2");
-        trigger = "terrain";
+    boolean plustime = false;
+      if (movementamountvert - spd >= 25){
+        if(themap[onmapy + 1][onmapx].equals("x") || (projectedx % 25 != 0 && themap[onmapy + 1][onmapx + 1].equals("x"))){
+          trigger = "terrain";
+          movementamountvert = 25;
+        }
+
       }
-    }
-    if ((holdx > 290 && holdx < 360)){
-      if(holdy - spd >= 290 && holdy - spd <= 310){
-        trigger = "terrain";
-      }
-      if(holdy - spd >= 390 && holdy - spd <= 410){
-        trigger = "terrain";
-      }
-    }
-    if ((holdx > 470 && holdx < 530)){
-      if (holdy - spd >= 330 && holdy - spd < 350){
-        trigger = "terrain";
-      }
-    }
   }
   if (a == 2){//terrain on left
-    if (holdx == 360 && (holdy >= 290 && holdy <= 310)){
-     trigger = "terrain";
-    } 
-    if (holdx == 530 && (holdy >= 340 && holdy <= 390)){
-      trigger = "terrain";
+    if (movementamounthorz == 0){
+      if(themap[onmapy][onmapx - 1].equals("x")){
+        trigger = "terrain";
+        println("collisonleft");
+        movementamounthorz = 0;
+      }else{
+        movementamounthorz = 25;
+        themap[onmapy][onmapx] = "a";
+        onmapx = onmapx - 1;
+        themap[onmapy][onmapx] = "p";
+      }
     }
   }
   if (a == 3){//terrain on right
-    if (holdx == 290 && (holdy >= 300 && holdy <= 320)){
-      trigger = "terrain";
-    }
-    if(holdx == 470 && (holdy >= 340 && holdy <= 390)){
-       trigger = "terrain";
+    if(movementamounthorz == 25){
+      if(themap[onmapy][onmapx + 1].equals("x")){
+        trigger = "terrain";
+        println("collisonright");
+        movementamounthorz = 25;
+      }else{
+        movementamounthorz = 0;
+        themap[onmapy][onmapx] = "a";
+        onmapx = onmapx + 1;
+        themap[onmapy][onmapx] = "p";
+      }
     }
   }
   return trigger;
