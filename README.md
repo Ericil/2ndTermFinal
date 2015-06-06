@@ -1,6 +1,47 @@
 2nd Term Final Project    
 Group Name: Megaman CS    
 
+6/6/15
+Updates:    
+- merged 2 branches together!    
+- currently there is an int that acts as a switch in the draw() that allows either the player to be shown or the boss, have not combined it yet    
+Updates from Jasons branch:    
+- a boss class    
+- algorithm for 1 boss(really amazing)    
+- boss moves, attacks, shoots    
+- added sprites for the boss    
+Updates from Derry’s branch:    
+- completely redid how terrain works    
+- terrain is now a textfile    
+- interactions between player and terrain now relies on textfile for hitbox    
+
+Need to do(for monday demo):    
+- fixing interaction with walls on right    
+- making the entire map    
+- making the boss and player interactable    
+- Boss animations(ugh)    
+- mobs    
+- redoing mob interactions    
+
+Need to do(for final due date):    
+- maybe another boss    
+- another level or 2    
+- more mobs    
+- more animations because of more bosses and mobs    
+- music    
+- polishing    
+6/5/15    
+Updates:
+- fixed attack sprites    
+
+Need to do:    
+- terrain interaction    
+- levels    
+- more animations    
+- mob and boss stuff    
+- music    
+- polishing    
+
 6/4/15    
 Updates:    
 - added attack animation    
