@@ -5,11 +5,13 @@ Group Name: Megaman CS
 Updates:    
 - merged 2 branches together!    
 - currently there is an int that acts as a switch in the draw() that allows either the player to be shown or the boss, have not combined it yet    
+
 Updates from Jasons branch:    
 - a boss class    
 - algorithm for 1 boss(really amazing)    
 - boss moves, attacks, shoots    
 - added sprites for the boss    
+
 Updates from Derry’s branch:    
 - completely redid how terrain works    
 - terrain is now a textfile    
@@ -30,6 +32,7 @@ Need to do(for final due date):
 - more animations because of more bosses and mobs    
 - music    
 - polishing    
+
 6/5/15    
 Updates:
 - fixed attack sprites    
