@@ -18,6 +18,19 @@ int shift;
 BufferedReader test;
 String[][] themap;
 int movementamountvert, movementamounthorz;
+Boss boss = new Boss();
+int timer = 0;
+int counter = 0;
+int counter2 = 0;
+int counter3 = 0;
+int timer2 = 0;
+boolean bossjump = false;
+boolean bossair = false;
+boolean bossprojectile = false;
+int countdown = 3;
+Random chance = new Random();
+boolean changeprojectile = false;
+ArrayList<Projectile> projectiles = new ArrayList<Projectile>();
 void setup() {
   onmapx = 0;
   onmapy = 0;
@@ -68,26 +81,22 @@ void starting(){
     direction = "right";
     onfloor = true;
 }
+
 void draw() {
-  /*
-  for(int a = 0; a < themap.length; a++){
-    for(int b = 0; b < themap[a].length; b++){
-      print(themap[a][b] + " ");
-    }
-    println();
-  }
-  */
-  //println("playerxy: " + theplayer.getx(), theplayer.gety());
-  //println("Cycle");
+  background(255);
+  int a = 0;
+  //enemymovements();//movement of the enemies
+  if (a == 0){
+  displayBoss();
+  }else{
   if(theplayer.gety() > 700){
     starting();
   }
-  background(255);
   fill(0);
   displayterrain();
-  //enemymovements();//movement of the enemies
   playermovements();//movement of the player
   loadplayer();
+  }
 }
 
 void playermovements() {//movement of player
@@ -287,6 +296,7 @@ void enemymovements() {// this is for one mob right now, later on,
   }
 }
 */
+/*
 boolean mobinteractions(int a, int b) {
   boolean trigger = true;
   if (b == 0) {//up
@@ -311,6 +321,7 @@ boolean mobinteractions(int a, int b) {
   }
   return trigger;
 }
+*/
 String playerinteractions(int a) {
   String trigger = "no terrain";
   if (a == 0) {//up
@@ -521,3 +532,113 @@ String terrainint(int a){
   }
   return trigger;
 }
+
+void displayBoss(){
+  rect(boss.getx(),boss.gety(),50,50);
+  int start = millis();
+  if ((start-timer) > 3000){
+    if (bossprojectile || projectiles.size() > 0){
+      System.out.println("projectile attack");
+      System.out.println(timer2);
+      if (countdown == 3){
+        projectiles.add(new Projectile(boss.getx(),boss.gety(),boss.getside()));
+        System.out.println("projectile added1");
+        timer2 = millis();
+        countdown--;
+      }else if(countdown > 0 && start-timer2 > 1000){
+        projectiles.add(new Projectile(boss.getx(),boss.gety(),boss.getside()));
+        System.out.println("projectile added2");
+        timer2 = millis();
+        countdown--;
+      }else if (countdown == 0 && projectiles.size() == 0){
+        bossprojectile = false;
+        countdown = 3;
+        changeprojectile = false;
+        timer = millis();
+      }
+      if (projectiles.size() > 0){
+      for (int i = 0;i<projectiles.size();i++){
+        System.out.println(projectiles.get(i).getx()+","+projectiles.get(i).gety());
+        ellipse(projectiles.get(i).getx(),projectiles.get(i).gety(),10,10);
+        if (!projectiles.get(i).getside()){
+        projectiles.get(i).setx(projectiles.get(i).getx()+10);
+        }else{
+          projectiles.get(i).setx(projectiles.get(i).getx()-10);
+        }
+        if (projectiles.get(i).getx() > 700 || projectiles.get(i).getx() < 100){
+          projectiles.remove(i);
+        }
+      }
+      }
+    }
+    else if (boss.getx() == 700 || boss.getx() == 100){
+      int action, action2, action3;
+      if (counter < 6){
+        action = chance.nextInt(5-counter);
+        action2 = chance.nextInt(7-counter2);
+        action3 = chance.nextInt(9-counter3);
+      }else if(counter < 9){
+        action = 0;
+        action2 = 0;
+        action3 = chance.nextInt(9-counter3);
+      }else{
+        action3 = 0;
+        action = 4;
+        action2 = 6;
+      }
+      if (action3 == 0){
+        bossprojectile = true;
+        counter3 = 0;
+      }else if (action2 == 0){
+        bossair = true;
+        counter2 = 0;
+      }else if(action == 0){
+        bossjump = true;
+        counter = 0;
+      }
+    }
+    if (!bossprojectile){
+    if (boss.getside()){
+    boss.setx(boss.getx()-10);
+    }else{
+      boss.setx(boss.getx()+10);
+    }
+    }
+    if (bossair){
+      boss.sety(200);
+    }
+    if (bossjump){
+      if(boss.gety() == 400){
+        boss.setspd(40);
+      }
+      else{
+        boss.setspd(boss.getspd() - 4);
+      }
+      boss.sety(boss.gety()-boss.getspd());
+    }
+    if (boss.getx() == 100 && boss.getside()){
+      boss.sety(400);
+      boss.switchside();
+      timer = millis();
+      counter++;
+      counter2++;
+      counter3++;
+      bossair = false;
+      bossjump = false;
+      bossprojectile = false;
+      boss.setspd(0);
+    }else if(boss.getx() == 700 && !boss.getside()){
+      boss.sety(400);
+      boss.switchside();
+      timer = millis();
+      counter++;
+      counter2++;
+      counter3++;
+      bossair = false;
+      bossjump = false;
+      bossprojectile = false;
+      boss.setspd(0);
+    }
+  }
+}
+
