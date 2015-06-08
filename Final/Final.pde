@@ -31,6 +31,11 @@ int countdown = 3;
 Random chance = new Random();
 boolean changeprojectile = false;
 ArrayList<Projectile> projectiles = new ArrayList<Projectile>();
+boolean lock = false;
+boolean lockmore = false;
+boolean finishedloading = false;
+int loadingbosscount = 0;
+int makingcell = 375;
 void setup() {
   frameRate(60);
   currentmobs = new ArrayList<Mob>();
@@ -47,9 +52,9 @@ void setup() {
   }
   catch(IOException e) {
   }
-  themap = new String[20][128];
+  themap = new String[20][160];
   for (int a = 0; a < hold.length; a++) {
-    for (int b = 0; b < 128; b++) {
+    for (int b = 0; b < 160; b++) {
       themap[a][b] = hold[a].substring(b, b+1);
       if (themap[a][b].equals("p")) {
         theplayer.setx(b * 25);
@@ -111,12 +116,19 @@ void draw() {
     if (theplayer.gety() - spd > 450) {
       starting();
     }
+    if (lockmore == true) {
+      loadfinal();
+    }
     displayterrain();
     playermovements();//movement of the player
     combat();
     monstermovements();
+    if(finishedloading == true){
+      displayBoss();
+    }
     loadmonsters();
     loadplayer();
+    
   }
 }
 
@@ -130,16 +142,17 @@ void combat() {
         }
       }
     } else {
-        for (int a = 0; a < currentmobs.size (); a++) {
-          if (projectedx > currentmobs.get(a).getx() && projectedx - 40 > currentmobs.get(a).getx() && theplayer.gety() == currentmobs.get(a).gety()) {
-            currentmobs.remove(a);
-          }
+      for (int a = 0; a < currentmobs.size (); a++) {
+        if (projectedx > currentmobs.get(a).getx() && projectedx - 40 > currentmobs.get(a).getx() && theplayer.gety() == currentmobs.get(a).gety()) {
+          currentmobs.remove(a);
         }
       }
+    }
   }
 }
-void playermovements() {//movement of player
-  //println("player: " + projectedx, theplayer.gety());
+void playermovements() {//movement of players
+  println("lock:" + lock);
+  println("player: " + projectedx, theplayer.gety());
   if (atking == true && onfloor) {
     if (intervalatk == 3) {
       if (atknum == 5) {
@@ -152,7 +165,7 @@ void playermovements() {//movement of player
     } else {
       intervalatk++;
     }
-  } else {
+  } else if (lockmore == false) {
     if (playerinteractions(1) == "no terrain") {
       onfloor = false;
     }
@@ -241,16 +254,29 @@ void playermovements() {//movement of player
       }
     }
     if (keyLeft && playerinteractions(2) == "no terrain") {//left
-      if (projectedx < 400) {
+      if (projectedx < 400 || projectedx > 3225) {
+        println("trigger");
         theplayer.setx(theplayer.getx() - 5);
       } else {
-        shift = shift - 5;
+        if (lock == false) {
+          println("trigger2");
+          shift = shift - 5;
+        }
       }
-      projectedx = projectedx - 5;
-      movementamounthorz = movementamounthorz - 5;
+      if (lock == false || projectedx >= 3225){
+        projectedx = projectedx - 5;
+        movementamounthorz = movementamounthorz - 5;
+      }
     }
     if (keyRight && playerinteractions(3) == "no terrain") {//right
-      if (projectedx < 400) {
+      if (projectedx < 400 || projectedx >= 3225) {
+        if (projectedx == 3325 && lock == false) {
+          if (onfloor == true) {
+            lockmore = true;
+          }
+          println("trigger");
+          lock = true;
+        }
         theplayer.setx(theplayer.getx() + 5);
       } else {
         shift = shift + 5;
@@ -565,7 +591,7 @@ String terrainint(int a) {
     if (movementamounthorz == 25) {
       if (themap[onmapy][onmapx + 1].equals("x")) {
         trigger = "terrain";
-        println("collisonright");
+        //println("collisonright");
         movementamounthorz = 25;
       } else {
         movementamounthorz = 0;
@@ -578,6 +604,25 @@ String terrainint(int a) {
   return trigger;
 }
 
+void loadfinal() {
+  if (loadingbosscount == 0) {
+    lockmore = true;
+    theplayer.setx(theplayer.getx() - 5);
+    shift = shift + 5;
+    loadingbosscount = loadingbosscount + 5;
+  } else if (loadingbosscount != 375) {
+    theplayer.setx(theplayer.getx() - 5);
+    shift = shift + 5;
+    loadingbosscount = loadingbosscount + 5;
+  } else if (loadingbosscount == 375) {
+    lockmore = false;
+    finishedloading = true;
+  }
+  if(makingcell >= 25){
+    themap[makingcell / 25][3200 / 25] = "x";
+    makingcell = makingcell - 25;
+  }
+}
 void displayBoss() {
   rect(boss.getx(), boss.gety(), 50, 50);
   int start = millis();
@@ -652,7 +697,7 @@ void displayBoss() {
       boss.sety(200);
     }
     if (bossjump) {
-      if (boss.gety() == 400) {
+      if (boss.gety() == 350) {
         boss.setspd(40);
       } else {
         boss.setspd(boss.getspd() - 4);
@@ -660,7 +705,7 @@ void displayBoss() {
       boss.sety(boss.gety()-boss.getspd());
     }
     if (boss.getx() == 100 && boss.getside()) {
-      boss.sety(400);
+      boss.sety(350);
       boss.switchside();
       timer = millis();
       counter++;
@@ -671,7 +716,7 @@ void displayBoss() {
       bossprojectile = false;
       boss.setspd(0);
     } else if (boss.getx() == 700 && !boss.getside()) {
-      boss.sety(400);
+      boss.sety(350);
       boss.switchside();
       timer = millis();
       counter++;

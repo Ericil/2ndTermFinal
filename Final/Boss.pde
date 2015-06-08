@@ -4,7 +4,7 @@ class Boss{
  
  Boss(){
   x = 700;
-  y = 400;
+  y = 350;
   spd = 0;
   side = true;
  }
