@@ -143,7 +143,7 @@ void combat() {
       }
     } else {
       for (int a = 0; a < currentmobs.size (); a++) {
-        if (projectedx > currentmobs.get(a).getx() && projectedx - 40 > currentmobs.get(a).getx() && theplayer.gety() == currentmobs.get(a).gety()) {
+        if (projectedx > currentmobs.get(a).getx() && projectedx - 40 < currentmobs.get(a).getx() && theplayer.gety() == currentmobs.get(a).gety()) {
           currentmobs.remove(a);
         }
       }
