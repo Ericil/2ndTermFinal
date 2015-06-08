@@ -135,7 +135,7 @@ void draw() {
 void combat() {
   if (atking == true) {
     if (direction == "right") {
-      println("atking right");
+      //println("atking right");
       for (int a = 0; a < currentmobs.size (); a++) {
         if (projectedx < currentmobs.get(a).getx() && projectedx + 40 > currentmobs.get(a).getx() && theplayer.gety() == currentmobs.get(a).gety()) {
           currentmobs.remove(a);
@@ -151,8 +151,8 @@ void combat() {
   }
 }
 void playermovements() {//movement of players
-  println("lock:" + lock);
-  println("player: " + projectedx, theplayer.gety());
+  //println("lock:" + lock);
+  //println("player: " + projectedx, theplayer.gety());
   if (atking == true && onfloor) {
     if (intervalatk == 3) {
       if (atknum == 5) {
@@ -255,11 +255,11 @@ void playermovements() {//movement of players
     }
     if (keyLeft && playerinteractions(2) == "no terrain") {//left
       if (projectedx < 400 || projectedx > 3225) {
-        println("trigger");
+        //println("trigger");
         theplayer.setx(theplayer.getx() - 5);
       } else {
         if (lock == false) {
-          println("trigger2");
+          //println("trigger2");
           shift = shift - 5;
         }
       }
@@ -274,7 +274,7 @@ void playermovements() {//movement of players
           if (onfloor == true) {
             lockmore = true;
           }
-          println("trigger");
+          //println("trigger");
           lock = true;
         }
         theplayer.setx(theplayer.getx() + 5);
@@ -577,7 +577,7 @@ String terrainint(int a) {
     if (movementamounthorz == 0) {
       if (themap[onmapy][onmapx - 1].equals("x")) {
         trigger = "terrain";
-        println("collisonleft");
+        //println("collisonleft");
         movementamounthorz = 0;
       } else {
         movementamounthorz = 25;
@@ -628,16 +628,16 @@ void displayBoss() {
   int start = millis();
   if ((start-timer) > 3000) {
     if (bossprojectile || projectiles.size() > 0) {
-      System.out.println("projectile attack");
-      System.out.println(timer2);
+      //System.out.println("projectile attack");
+      //System.out.println(timer2);
       if (countdown == 3) {
         projectiles.add(new Projectile(boss.getx(), boss.gety(), boss.getside()));
-        System.out.println("projectile added1");
+        //System.out.println("projectile added1");
         timer2 = millis();
         countdown--;
       } else if (countdown > 0 && start-timer2 > 1000) {
         projectiles.add(new Projectile(boss.getx(), boss.gety(), boss.getside()));
-        System.out.println("projectile added2");
+        //System.out.println("projectile added2");
         timer2 = millis();
         countdown--;
       } else if (countdown == 0 && projectiles.size() == 0) {
@@ -648,7 +648,7 @@ void displayBoss() {
       }
       if (projectiles.size() > 0) {
         for (int i = 0; i<projectiles.size (); i++) {
-          System.out.println(projectiles.get(i).getx()+","+projectiles.get(i).gety());
+          //System.out.println(projectiles.get(i).getx()+","+projectiles.get(i).gety());
           ellipse(projectiles.get(i).getx(), projectiles.get(i).gety(), 10, 10);
           if (!projectiles.get(i).getside()) {
             projectiles.get(i).setx(projectiles.get(i).getx()+10);
