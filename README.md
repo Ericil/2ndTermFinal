@@ -1,6 +1,27 @@
 2nd Term Final Project    
 Group Name: Megaman CS    
 
+6/8/15    
+Updates:    
+- added boss to the overall level    
+- enclosed the room    
+- made map shift when encountering boss    
+
+
+6/7/15    
+Updates:    
+- added more to map    
+- added 2 mobs (are currently red squares for placeholder)    
+- tried terrain pngs (was too laggy)    
+- added basic combat    
+
+Need to do:   
+- animations    
+- wall interaction    
+- combat    
+- music    
+- polishing    
+
 6/6/15
 Updates:    
 - merged 2 branches together!    
