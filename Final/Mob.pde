@@ -2,9 +2,6 @@ class Mob{
   int x;
   int y;
   boolean movement;
-  Mob(){
-    this(100, 200);
-  }
   Mob(int a, int b){
     x = a;
     y = b;

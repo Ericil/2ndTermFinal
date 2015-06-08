@@ -32,242 +32,281 @@ Random chance = new Random();
 boolean changeprojectile = false;
 ArrayList<Projectile> projectiles = new ArrayList<Projectile>();
 void setup() {
+  frameRate(60);
+  currentmobs = new ArrayList<Mob>();
   onmapx = 0;
   onmapy = 0;
   theplayer = new Player();
   test = createReader("map.txt");
   String ugh = null;
   String[] hold = new String[20];
-  try{
-    for(int a = 0; (ugh = test.readLine()) != null; a++){
+  try {
+    for (int a = 0; (ugh = test.readLine ()) != null; a++) {
       hold[a] = ugh;
     }
-  }catch(IOException e){
   }
-  themap = new String[20][32];
-  for(int a = 0; a < hold.length; a++){
-    for(int b = 0; b < 32; b++){
+  catch(IOException e) {
+  }
+  themap = new String[20][128];
+  for (int a = 0; a < hold.length; a++) {
+    for (int b = 0; b < 128; b++) {
       themap[a][b] = hold[a].substring(b, b+1);
-      if (themap[a][b].equals("p")){
+      if (themap[a][b].equals("p")) {
         theplayer.setx(b * 25);
         theplayer.sety(a * 25);
         onmapx = b;
         onmapy = a;
       }
+      if (themap[a][b].equals("m")) {
+        currentmobs.add(new Mob(b * 25, a * 25));
       }
     }
+  }
   starting();
   size(800, 500);
-  currentmobs = new ArrayList<Mob>();
-  currentmobs.add(new Mob());//one mob for right now
 }
 
-void starting(){
-    movementamountvert = 25;
-    movementamounthorz = 0;
-    spd = 0;
-    leftnum = 0;
-    rightnum = 0;
-    jumpnum = 0;
-    idlenum = 0;
-    intervalleft = 0;
-    intervalright = 0;
-    intervalidle = 0;
-    intervalatk = 0;
-    atking = false;
-    projectedx = theplayer.getx();
-    projectedy = theplayer.gety();
-    shift = 0;
-    direction = "right";
-    onfloor = true;
+void starting() {
+  theplayer.setx(100);
+  theplayer.sety(375);
+  themap[onmapy][onmapx] = "a";
+  onmapx = 4;
+  onmapy = 15;
+  themap[onmapy][onmapx] = "p";
+  movementamountvert = 25;
+  movementamounthorz = 0;
+  spd = 0;
+  leftnum = 0;
+  rightnum = 0;
+  jumpnum = 0;
+  idlenum = 0;
+  intervalleft = 0;
+  intervalright = 0;
+  intervalidle = 0;
+  intervalatk = 0;
+  atking = false;
+  projectedx = theplayer.getx();
+  projectedy = theplayer.gety();
+  shift = 0;
+  direction = "right";
+  onfloor = true;
 }
 
 void draw() {
+  /*
+  for(int a = 0; a < themap.length; a++){
+   for(int b = 0; b < themap[a].length; b++){
+   print(themap[a][b] + " ");
+   }
+   println();
+   }
+   */
   background(255);
-  int a = 0;
+  int a = 1;
   //enemymovements();//movement of the enemies
-  if (a == 0){
-  displayBoss();
-  }else{
-  if(theplayer.gety() > 700){
-    starting();
-  }
-  fill(0);
-  displayterrain();
-  playermovements();//movement of the player
-  loadplayer();
+  if (a == 0) {
+    displayBoss();
+  } else {
+    fill(0);
+    if (theplayer.gety() - spd > 450) {
+      starting();
+    }
+    displayterrain();
+    playermovements();//movement of the player
+    combat();
+    monstermovements();
+    loadmonsters();
+    loadplayer();
   }
 }
 
+void combat() {
+  if (atking == true) {
+    if (direction == "right") {
+      println("atking right");
+      for (int a = 0; a < currentmobs.size (); a++) {
+        if (projectedx < currentmobs.get(a).getx() && projectedx + 40 > currentmobs.get(a).getx() && theplayer.gety() == currentmobs.get(a).gety()) {
+          currentmobs.remove(a);
+        }
+      }
+    } else {
+        for (int a = 0; a < currentmobs.size (); a++) {
+          if (projectedx > currentmobs.get(a).getx() && projectedx - 40 > currentmobs.get(a).getx() && theplayer.gety() == currentmobs.get(a).gety()) {
+            currentmobs.remove(a);
+          }
+        }
+      }
+  }
+}
 void playermovements() {//movement of player
-  if(atking == true && onfloor){
-    if(intervalatk == 3){
-      if (atknum == 5){
+  //println("player: " + projectedx, theplayer.gety());
+  if (atking == true && onfloor) {
+    if (intervalatk == 3) {
+      if (atknum == 5) {
         atking = false;
         atknum = 0;
-      }
-      else{
+      } else {
         atknum++;
       }
       intervalatk = 0;
-    }else{
+    } else {
       intervalatk++;
     }
-  }else{
-    if (playerinteractions(1) == "no terrain"){
+  } else {
+    if (playerinteractions(1) == "no terrain") {
       onfloor = false;
     }
     if (spd > 0 && playerinteractions(0) == "no terrain") {//jumping, going up
       theplayer.sety(theplayer.gety() - spd);
-      if(movementamountvert - spd <= 0){
+      if (movementamountvert - spd <= 0) {
         movementamountvert = movementamountvert - spd + 25;
         themap[onmapy][onmapx] = "a";
         onmapy = onmapy - 1;
         themap[onmapy][onmapx] = "p";
-      }else{
+      } else {
         movementamountvert = movementamountvert - spd;
       }
-      if(spd -2 == 0){
+      if (spd -2 == 0) {
         spd = -2;
-      }else{
+      } else {
         spd--;
       }
-    }else if (spd < 0 && playerinteractions(1) == "no terrain" && onfloor == false) {//jumping, going down
+    } else if (spd < 0 && playerinteractions(1) == "no terrain" && onfloor == false) {//jumping, going down
       theplayer.sety(theplayer.gety() - spd);
-      if(movementamountvert - spd >= 25){
-          movementamountvert = movementamountvert - spd - 25;
-          themap[onmapy][onmapx] = "a";
-          onmapy = onmapy + 1;
-          themap[onmapy][onmapx] = "p";
-      }else{
+      if (movementamountvert - spd >= 25) {
+        movementamountvert = movementamountvert - spd - 25;
+        themap[onmapy][onmapx] = "a";
+        onmapy = onmapy + 1;
+        themap[onmapy][onmapx] = "p";
+      } else {
         movementamountvert = movementamountvert - spd;
       }
       spd--;
-    }else if (playerinteractions(0) == "terrain" && onfloor == false) {//jumping, interactions with entities above
+    } else if (playerinteractions(0) == "terrain" && onfloor == false) {//jumping, interactions with entities above
       spd = 0;
       movementamountvert = movementamountvert - spd;
       theplayer.sety(theplayer.gety() - spd);
       spd --;
-    }else if (playerinteractions(1) == "terrain" && onfloor == false){
+    } else if (playerinteractions(1) == "terrain" && onfloor == false) {
       onfloor = true;
       theplayer.sety(theplayer.gety()/25 * 25 + 25);
       spd = 0;
       movementamountvert = movementamountvert - spd;
-    }else if (spd == 0 && onfloor == false && playerinteractions(1) == "no terrain"){
+    } else if (spd == 0 && onfloor == false && playerinteractions(1) == "no terrain") {
       spd = -1;
       theplayer.sety(theplayer.gety() - spd);
-      if(movementamountvert - spd >= 25){
-          movementamountvert = movementamountvert - spd - 25;
-          themap[onmapy][onmapx] = "a";
-          onmapy = onmapy + 1;
-          themap[onmapy][onmapx] = "p";
-      }else{
+      if (movementamountvert - spd >= 25) {
+        movementamountvert = movementamountvert - spd - 25;
+        themap[onmapy][onmapx] = "a";
+        onmapy = onmapy + 1;
+        themap[onmapy][onmapx] = "p";
+      } else {
         movementamountvert = movementamountvert - spd;
       }
       spd--;
     }
-    if(onfloor == false){
-      if (spd == 0){
+    if (onfloor == false) {
+      if (spd == 0) {
         jumpnum = 5;
       }
-      if (spd == 15){
+      if (spd == 15) {
         jumpnum = 0;
       }
-      if (spd < 15 && spd >= 11){
+      if (spd < 15 && spd >= 11) {
         jumpnum = 1;
       }
-      if (spd < 11 && spd >= 7){
+      if (spd < 11 && spd >= 7) {
         jumpnum = 2;
       }
-      if (spd < 7 && spd >= 4){
+      if (spd < 7 && spd >= 4) {
         jumpnum = 3;
       }
-      if (spd < 4 && spd >= 1){
+      if (spd < 4 && spd >= 1) {
         jumpnum = 4;
       }
-      if (spd < 0 && spd >= -4){
+      if (spd < 0 && spd >= -4) {
         jumpnum = 6;
       }
-      if (spd < -4 && spd >= -8){
+      if (spd < -4 && spd >= -8) {
         jumpnum = 7;
       }
-      if (spd < -8 && spd >= -12){
+      if (spd < -8 && spd >= -12) {
         jumpnum = 8;
       }
-      if (spd < -12 && spd >= -16){
+      if (spd < -12 && spd >= -16) {
         jumpnum = 9;
       }
-      if (spd < -16){
+      if (spd < -16) {
         jumpnum = 10;
       }
     }
     if (keyLeft && playerinteractions(2) == "no terrain") {//left
-      if(projectedx < 400){
+      if (projectedx < 400) {
         theplayer.setx(theplayer.getx() - 5);
-      }else{
+      } else {
         shift = shift - 5;
       }
       projectedx = projectedx - 5;
       movementamounthorz = movementamounthorz - 5;
     }
     if (keyRight && playerinteractions(3) == "no terrain") {//right
-      if(projectedx < 400){
+      if (projectedx < 400) {
         theplayer.setx(theplayer.getx() + 5);
-      }else{
+      } else {
         shift = shift + 5;
       }
       projectedx = projectedx + 5;
       movementamounthorz = movementamounthorz + 5;
     }
-    if (keyRight && onfloor == false){
-      if(direction != "right"){
+    if (keyRight && onfloor == false) {
+      if (direction != "right") {
         direction = "right";
       }
     }
-    if (keyLeft && onfloor == false){
-      if(direction != "left"){
+    if (keyLeft && onfloor == false) {
+      if (direction != "left") {
         direction = "left";
       }
     }
-    if(keyRight && onfloor == true){
-      if(intervalright == 3){
-        if (direction != "right"){
+    if (keyRight && onfloor == true) {
+      if (intervalright == 3) {
+        if (direction != "right") {
           direction = "right";
           rightnum = 0;
-        }else if (rightnum == 10){
+        } else if (rightnum == 10) {
           rightnum = 0;
-        }else{
+        } else {
           rightnum++;
         }
         intervalright = 0;
-      }else{
+      } else {
         intervalright++;
       }
     }
-    if(keyLeft && onfloor == true){
-      if(intervalleft == 3){
-        if (direction != "left"){
+    if (keyLeft && onfloor == true) {
+      if (intervalleft == 3) {
+        if (direction != "left") {
           direction = "left";
           leftnum = 0;
-        }else if(leftnum == 10){
+        } else if (leftnum == 10) {
           leftnum = 0;
-        }else{
+        } else {
           leftnum++;
         }
         intervalleft = 0;
-      }else{
+      } else {
         intervalleft++;
       }
     }
-    if(keyUp == false && keyDown == false && keyRight == false && keyLeft == false && onfloor == true){
-      if(intervalidle == 2){
-        if(idlenum == 7){
+    if (keyUp == false && keyDown == false && keyRight == false && keyLeft == false && onfloor == true) {
+      if (intervalidle == 2) {
+        if (idlenum == 7) {
           idlenum = 0;
-        }else{
+        } else {
           idlenum++;
         }
         intervalidle = 0;
-      }else{
+      } else {
         intervalidle++;
       }
     }
@@ -275,53 +314,59 @@ void playermovements() {//movement of player
   //rect(theplayer.getx(), theplayer.gety(), 20, 20);//drawing the player
 }
 
-/*
-void enemymovements() {// this is for one mob right now, later on,
-  //will store the boundaries of a mob's movement somewhere and access it here, this is just code to have something working
+void monstermovements() {// this is for one mob right now, later on,
   for (int a = 0; a < currentmobs.size (); a++) {
-    rect(currentmobs.get(a).getx(), currentmobs.get(a).gety(), 20, 20);
-  }
-  for (int a = 0; a < currentmobs.size (); a++) {
-    if (currentmobs.get(a).getx() == 300) {
-      currentmobs.get(a).setmovement(true);
+    if (currentmobs.get(a).getx() % 25 == 0 && currentmobs.get(a).getmovement() == true) {
+      if (themap[currentmobs.get(a).gety() / 25][currentmobs.get(a).getx() / 25 - 1].equals("x")) {
+        currentmobs.get(a).setmovement(false);
+      }
+    } else if (currentmobs.get(a).getx() % 25 == 0 && currentmobs.get(a).getmovement() == false) {
+      if (themap[currentmobs.get(a).gety() / 25][currentmobs.get(a).getx() / 25 + 1].equals("x")) {
+        currentmobs.get(a).setmovement(true);
+      }
     }
-    if (currentmobs.get(a).getx() == 100) {
-      currentmobs.get(a).setmovement(false);
-    }
-    if (currentmobs.get(a).getmovement() && mobinteractions(a, 2)) {
-      currentmobs.get(a).setx(currentmobs.get(a).getx()-1);
-    } else if (mobinteractions(a, 3)) {
-      currentmobs.get(a).setx(currentmobs.get(a).getx()+1);
+    if (currentmobs.get(a).getmovement() == false) {
+      currentmobs.get(a).setx(currentmobs.get(a).getx() + 5);
+    } else {
+      currentmobs.get(a).setx(currentmobs.get(a).getx() - 5);
     }
   }
 }
-*/
+void loadmonsters() {
+  for (int a = 0; a < currentmobs.size (); a++) {
+    if (currentmobs.get(a).getx() - shift < 900 && currentmobs.get(a).getx() >= 0) {
+      fill(255, 0, 0);
+      //println("mobs: " + currentmobs.get(a).getx(), currentmobs.get(a).gety());
+      rect(currentmobs.get(a).getx() - shift, currentmobs.get(a).gety(), 25, 25);
+    }
+  }
+}
 /*
 boolean mobinteractions(int a, int b) {
-  boolean trigger = true;
-  if (b == 0) {//up
-    if (dist(currentmobs.get(a).getx(), currentmobs.get(a).gety(), theplayer.getx(), theplayer.gety()) <= 25 && currentmobs.get(a).gety() < theplayer.gety()) {
-      trigger = false;
-    }
-  }
-  if (b == 1) {//down
-    if (dist(currentmobs.get(a).getx(), currentmobs.get(a).gety(), theplayer.getx(), theplayer.gety()) <= 25 && currentmobs.get(a).gety() > theplayer.gety()) {
-      trigger = false;
-    }
-  }
-  if (b == 2) {//left
-    if (dist(currentmobs.get(a).getx(), currentmobs.get(a).gety(), theplayer.getx(), theplayer.gety()) <= 25 && currentmobs.get(a).getx() > theplayer.getx()) {
-      trigger = false;
-    }
-  }
-  if (b == 3) {//right
-    if (dist(currentmobs.get(a).getx(), currentmobs.get(a).gety(), theplayer.getx(), theplayer.gety()) <= 25 && currentmobs.get(a).getx() < theplayer.getx()) {
-      trigger = false;
-    }
-  }
-  return trigger;
-}
-*/
+ boolean trigger = true;
+ if (b == 0) {//up
+ if (dist(currentmobs.get(a).getx(), currentmobs.get(a).gety(), theplayer.getx(), theplayer.gety()) <= 25 && currentmobs.get(a).gety() < theplayer.gety()) {
+ trigger = false;
+ }
+ }
+ if (b == 1) {//down
+ if (dist(currentmobs.get(a).getx(), currentmobs.get(a).gety(), theplayer.getx(), theplayer.gety()) <= 25 && currentmobs.get(a).gety() > theplayer.gety()) {
+ trigger = false;
+ }
+ }
+ if (b == 2) {//left
+ if (dist(currentmobs.get(a).getx(), currentmobs.get(a).gety(), theplayer.getx(), theplayer.gety()) <= 25 && currentmobs.get(a).getx() > theplayer.getx()) {
+ trigger = false;
+ }
+ }
+ if (b == 3) {//right
+ if (dist(currentmobs.get(a).getx(), currentmobs.get(a).gety(), theplayer.getx(), theplayer.gety()) <= 25 && currentmobs.get(a).getx() < theplayer.getx()) {
+ trigger = false;
+ }
+ }
+ return trigger;
+ }
+ */
 String playerinteractions(int a) {
   String trigger = "no terrain";
   if (a == 0) {//up
@@ -330,7 +375,7 @@ String playerinteractions(int a) {
         trigger = "terrain";
       }
     }
-    if(terrainint(0) == "terrain"){
+    if (terrainint(0) == "terrain") {
       trigger = "terrain";
     }
   }
@@ -340,7 +385,7 @@ String playerinteractions(int a) {
         trigger = "terrain";
       }
     }
-    if(terrainint(1) == "terrain"){
+    if (terrainint(1) == "terrain") {
       trigger = "terrain";
     }
   }
@@ -350,7 +395,7 @@ String playerinteractions(int a) {
         trigger = "terrain";
       }
     }
-    if(terrainint(2) == "terrain"){
+    if (terrainint(2) == "terrain") {
       trigger = "terrain";
     }
   }
@@ -360,7 +405,7 @@ String playerinteractions(int a) {
         trigger = "terrain";
       }
     }
-    if(terrainint(3) == "terrain"){
+    if (terrainint(3) == "terrain") {
       trigger = "terrain";
     }
   }
@@ -368,7 +413,7 @@ String playerinteractions(int a) {
 }
 
 void keyPressed() {
-  if(keyCode == 65 && onfloor){
+  if (keyCode == 65 && onfloor) {
     atking = true;
   }
   if (keyCode == 38 && onfloor) {
@@ -406,109 +451,109 @@ void keyReleased() {
   }
 }
 
-void loadplayer(){
+void loadplayer() {
   imageMode(CORNER);
-  if (onfloor == true){
-    if (direction == "left"){
-      if(atking == true){
+  if (onfloor == true) {
+    if (direction == "left") {
+      if (atking == true) {
         PImage hold = loadImage("swordleft" + atknum + ".png");
-        image(hold, theplayer.getx(), theplayer.gety() - 10);
-      }else if (idleleft == false){
+        image(hold, theplayer.getx() - 26, theplayer.gety() - 10);
+      } else if (idleleft == false) {
         PImage hold = loadImage("left" + leftnum + ".png");
         image(hold, theplayer.getx(), theplayer.gety() - 10);
-      }else if (idleleft == true){
+      } else if (idleleft == true) {
         PImage hold = loadImage("idleleft" + idlenum + ".png");
         image(hold, theplayer.getx(), theplayer.gety() - 10);
       }
-      if(atking == true){
-        PImage hold = loadImage("swordleft" + atknum + ".png");
-        image(hold, theplayer.getx(), theplayer.gety() - 10);
-      }
     }
-    if (direction == "right"){
-      if (atking == true){
+    if (direction == "right") {
+      if (atking == true) {
         PImage hold = loadImage("swordright" + atknum + ".png");
         image(hold, theplayer.getx() - 20, theplayer.gety() - 10);
-      }else{
-        if(idleright == false){
-        PImage hold = loadImage("right" + rightnum + ".png");
-        image(hold, theplayer.getx() - 20, theplayer.gety()  - 10);
+      } else {
+        if (idleright == false) {
+          PImage hold = loadImage("right" + rightnum + ".png");
+          image(hold, theplayer.getx() - 20, theplayer.gety()  - 10);
         }
-        if (idleright == true){
-        PImage hold = loadImage("idleright" + idlenum + ".png");
-        image(hold, theplayer.getx() - 20, theplayer.gety() - 10);
+        if (idleright == true) {
+          PImage hold = loadImage("idleright" + idlenum + ".png");
+          image(hold, theplayer.getx() - 20, theplayer.gety() - 10);
         }
+      }
     }
-    }
-  }else{
-    if (direction == "right"){
+  } else {
+    if (direction == "right") {
       PImage hold = loadImage("jumpright" + jumpnum + ".png");
       image(hold, theplayer.getx() - 25, theplayer.gety() - 10);
     }
-    if (direction == "left"){
+    if (direction == "left") {
       PImage hold = loadImage("jumpleft" + jumpnum + ".png");
       image(hold, theplayer.getx(), theplayer.gety() - 10);
     }
   }
-  
 }
 
 
 void displayterrain() {
   //drawing the terrain
-  
+
   /*
   fill(0);
-  for (int a = 0; a < startx.size(); a++) {
-    rectMode(CORNER);
-    if(endy.get(a).equals(starty.get(a))){
-      rect(startx.get(a) - shift, starty.get(a), endx.get(a)-startx.get(a), 20);
-    }else{
-      rect(startx.get(a) - shift, starty.get(a), 20, endy.get(a)-starty.get(a));
-    }
-  }
-  */
+   for (int a = 0; a < startx.size(); a++) {
+   rectMode(CORNER);
+   if(endy.get(a).equals(starty.get(a))){
+   rect(startx.get(a) - shift, starty.get(a), endx.get(a)-startx.get(a), 20);
+   }else{
+   rect(startx.get(a) - shift, starty.get(a), 20, endy.get(a)-starty.get(a));
+   }
+   }
+   */
   fill(0);
   rectMode(CORNER);
-  for(int a = 0; a < themap.length; a++){
-    for(int b = 0; b < themap[a].length; b++){
-      if(themap[a][b].equals("x")){
+  for (int a = 0; a < themap.length; a++) {
+    for (int b = 0; b < themap[a].length; b++) {
+      if (themap[a][b].equals("x")) {
         rect(b * 25 - shift, a * 25, 25, 25);
+        /*
+        if(b * 25 - shift < 850 && b * 25 - shift >= -50){
+         PImage hold = loadImage("terrain.png");
+         image(hold, b * 25 - shift, a * 25);
+         }
+         */
       }
     }
   }
   fill(255);
 }
-String terrainint(int a){
+String terrainint(int a) {
   String trigger = "no terrain";
   //int holdx = theplayer.getx();
   int holdy = theplayer.gety();
   int holdx = projectedx;
-  if(a == 0){
-    if (movementamountvert - spd <= 0){
-        if (themap[onmapy - 1][onmapx].equals("x")){
-          trigger = "terrain";
-          movementamountvert = 0;
-        }
+  if (a == 0) {
+    if (movementamountvert - spd <= 0) {
+      if (themap[onmapy - 1][onmapx].equals("x")) {
+        trigger = "terrain";
+        movementamountvert = 0;
       }
+    }
   }
-  if(a == 1){
+  if (a == 1) {
     boolean plustime = false;
-      if (movementamountvert - spd >= 25){
-        if(themap[onmapy + 1][onmapx].equals("x") || (projectedx % 25 != 0 && themap[onmapy + 1][onmapx + 1].equals("x"))){
-          trigger = "terrain";
-          movementamountvert = 25;
-        }
-
+    if (movementamountvert - spd >= 25) {
+      if (themap[onmapy + 1][onmapx].equals("x") || (projectedx % 25 != 0 && themap[onmapy + 1][onmapx + 1].equals("x"))) {
+        trigger = "terrain";
+        movementamountvert = 25;
       }
+    }
   }
-  if (a == 2){//terrain on left
-    if (movementamounthorz == 0){
-      if(themap[onmapy][onmapx - 1].equals("x")){
+  if (a == 2) {//terrain on left
+    if (movementamounthorz == 0) {
+      if (themap[onmapy][onmapx - 1].equals("x")) {
         trigger = "terrain";
         println("collisonleft");
         movementamounthorz = 0;
-      }else{
+      } else {
         movementamounthorz = 25;
         themap[onmapy][onmapx] = "a";
         onmapx = onmapx - 1;
@@ -516,13 +561,13 @@ String terrainint(int a){
       }
     }
   }
-  if (a == 3){//terrain on right
-    if(movementamounthorz == 25){
-      if(themap[onmapy][onmapx + 1].equals("x")){
+  if (a == 3) {//terrain on right
+    if (movementamounthorz == 25) {
+      if (themap[onmapy][onmapx + 1].equals("x")) {
         trigger = "terrain";
         println("collisonright");
         movementamounthorz = 25;
-      }else{
+      } else {
         movementamounthorz = 0;
         themap[onmapy][onmapx] = "a";
         onmapx = onmapx + 1;
@@ -533,90 +578,88 @@ String terrainint(int a){
   return trigger;
 }
 
-void displayBoss(){
-  rect(boss.getx(),boss.gety(),50,50);
+void displayBoss() {
+  rect(boss.getx(), boss.gety(), 50, 50);
   int start = millis();
-  if ((start-timer) > 3000){
-    if (bossprojectile || projectiles.size() > 0){
+  if ((start-timer) > 3000) {
+    if (bossprojectile || projectiles.size() > 0) {
       System.out.println("projectile attack");
       System.out.println(timer2);
-      if (countdown == 3){
-        projectiles.add(new Projectile(boss.getx(),boss.gety(),boss.getside()));
+      if (countdown == 3) {
+        projectiles.add(new Projectile(boss.getx(), boss.gety(), boss.getside()));
         System.out.println("projectile added1");
         timer2 = millis();
         countdown--;
-      }else if(countdown > 0 && start-timer2 > 1000){
-        projectiles.add(new Projectile(boss.getx(),boss.gety(),boss.getside()));
+      } else if (countdown > 0 && start-timer2 > 1000) {
+        projectiles.add(new Projectile(boss.getx(), boss.gety(), boss.getside()));
         System.out.println("projectile added2");
         timer2 = millis();
         countdown--;
-      }else if (countdown == 0 && projectiles.size() == 0){
+      } else if (countdown == 0 && projectiles.size() == 0) {
         bossprojectile = false;
         countdown = 3;
         changeprojectile = false;
         timer = millis();
       }
-      if (projectiles.size() > 0){
-      for (int i = 0;i<projectiles.size();i++){
-        System.out.println(projectiles.get(i).getx()+","+projectiles.get(i).gety());
-        ellipse(projectiles.get(i).getx(),projectiles.get(i).gety(),10,10);
-        if (!projectiles.get(i).getside()){
-        projectiles.get(i).setx(projectiles.get(i).getx()+10);
-        }else{
-          projectiles.get(i).setx(projectiles.get(i).getx()-10);
-        }
-        if (projectiles.get(i).getx() > 700 || projectiles.get(i).getx() < 100){
-          projectiles.remove(i);
+      if (projectiles.size() > 0) {
+        for (int i = 0; i<projectiles.size (); i++) {
+          System.out.println(projectiles.get(i).getx()+","+projectiles.get(i).gety());
+          ellipse(projectiles.get(i).getx(), projectiles.get(i).gety(), 10, 10);
+          if (!projectiles.get(i).getside()) {
+            projectiles.get(i).setx(projectiles.get(i).getx()+10);
+          } else {
+            projectiles.get(i).setx(projectiles.get(i).getx()-10);
+          }
+          if (projectiles.get(i).getx() > 700 || projectiles.get(i).getx() < 100) {
+            projectiles.remove(i);
+          }
         }
       }
-      }
-    }
-    else if (boss.getx() == 700 || boss.getx() == 100){
+    } else if (boss.getx() == 700 || boss.getx() == 100) {
       int action, action2, action3;
-      if (counter < 6){
+      if (counter < 6) {
         action = chance.nextInt(5-counter);
         action2 = chance.nextInt(7-counter2);
         action3 = chance.nextInt(9-counter3);
-      }else if(counter < 9){
+      } else if (counter < 9) {
         action = 0;
         action2 = 0;
         action3 = chance.nextInt(9-counter3);
-      }else{
+      } else {
         action3 = 0;
         action = 4;
         action2 = 6;
       }
-      if (action3 == 0){
+      if (action3 == 0) {
         bossprojectile = true;
         counter3 = 0;
-      }else if (action2 == 0){
+      } else if (action2 == 0) {
         bossair = true;
         counter2 = 0;
-      }else if(action == 0){
+      } else if (action == 0) {
         bossjump = true;
         counter = 0;
       }
     }
-    if (!bossprojectile){
-    if (boss.getside()){
-    boss.setx(boss.getx()-10);
-    }else{
-      boss.setx(boss.getx()+10);
+    if (!bossprojectile) {
+      if (boss.getside()) {
+        boss.setx(boss.getx()-10);
+      } else {
+        boss.setx(boss.getx()+10);
+      }
     }
-    }
-    if (bossair){
+    if (bossair) {
       boss.sety(200);
     }
-    if (bossjump){
-      if(boss.gety() == 400){
+    if (bossjump) {
+      if (boss.gety() == 400) {
         boss.setspd(40);
-      }
-      else{
+      } else {
         boss.setspd(boss.getspd() - 4);
       }
       boss.sety(boss.gety()-boss.getspd());
     }
-    if (boss.getx() == 100 && boss.getside()){
+    if (boss.getx() == 100 && boss.getside()) {
       boss.sety(400);
       boss.switchside();
       timer = millis();
@@ -627,7 +670,7 @@ void displayBoss(){
       bossjump = false;
       bossprojectile = false;
       boss.setspd(0);
-    }else if(boss.getx() == 700 && !boss.getside()){
+    } else if (boss.getx() == 700 && !boss.getside()) {
       boss.sety(400);
       boss.switchside();
       timer = millis();
