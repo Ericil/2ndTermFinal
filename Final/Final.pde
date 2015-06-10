@@ -38,7 +38,9 @@ int loadingbosscount = 0;
 int makingcell = 375;
 boolean hit = false;
 int invuln = 0;
+PImage holding;
 void setup() {
+  holding = loadImage("terrain.png");
   frameRate(60);
   currentmobs = new ArrayList<Mob>();
   onmapx = 0;
@@ -98,6 +100,9 @@ void starting() {
   shift = 0;
   direction = "right";
   onfloor = true;
+  lock = false;
+  lockmore = false;
+  finishedloading = false;
 }
 
 void draw() {
@@ -106,7 +111,6 @@ void draw() {
    for(int b = 0; b < themap[a].length; b++){
    print(themap[a][b] + " ");
    }
-   println();
    }
    */
   background(255);
@@ -136,8 +140,8 @@ void draw() {
 }
 
 void combat() {
-  println("invuln: " + invuln);
-  println("HP :" + theplayer.getHP());
+  //println("invuln: " + invuln);
+  //println("HP :" + theplayer.getHP());
   if (atking == true) {
     if (direction == "right") {
       //println("atking right");
@@ -171,14 +175,22 @@ void combat() {
       if(currentmobs.get(a).getmovement() == false){
         if(projectedx > currentmobs.get(a).getx() && projectedx - 40 < currentmobs.get(a).getx() && theplayer.gety() == currentmobs.get(a).gety()){
           theplayer.setHP(theplayer.getHP() - 1);
-          invuln = 20;
+          invuln = 99;
         }
       }else{
         if(projectedx < currentmobs.get(a).getx() && projectedx + 40 > currentmobs.get(a).getx() && theplayer.gety() == currentmobs.get(a).gety()){
           theplayer.setHP(theplayer.getHP() - 1);
-          invuln = 20;
+          invuln = 99;
         }
       }
+    }
+    if(finishedloading){
+    if((theplayer.getx() > boss.getx() && theplayer.getx() - 40 < boss.getx() && theplayer.gety() == boss.gety() + 25) ||
+       (theplayer.getx() < boss.getx() && theplayer.getx() + 40 > boss.getx() && theplayer.gety() == boss.gety() + 25)){
+         theplayer.setHP(theplayer.getHP() - 1);
+         invuln = 99;
+         println("hit");
+       }
     }
   }else{
     invuln--;
@@ -187,6 +199,7 @@ void combat() {
 void playermovements() {//movement of players
   //println("lock:" + lock);
   //println("player: " + projectedx, theplayer.gety());
+  //println("onmapxy: " + onmapx, onmapy);
   //println("movementamout: " + movementamountvert);
   //println("spd: " + spd);
   if (atking == true && onfloor) {
@@ -210,9 +223,9 @@ void playermovements() {//movement of players
       theplayer.sety(theplayer.gety() - spd);
       if (movementamountvert - spd <= 0) {
         movementamountvert = movementamountvert - spd + 25;
-        themap[onmapy][onmapx] = "a";
+        //themap[onmapy][onmapx] = "a";
         onmapy = onmapy - 1;
-        themap[onmapy][onmapx] = "p";
+        //themap[onmapy][onmapx] = "p";
       } else {
         movementamountvert = movementamountvert - spd;
       }
@@ -226,9 +239,9 @@ void playermovements() {//movement of players
       theplayer.sety(theplayer.gety() - spd);
       if (movementamountvert - spd >= 25) {
         movementamountvert = movementamountvert - spd - 25;
-        themap[onmapy][onmapx] = "a";
+        //themap[onmapy][onmapx] = "a";
         onmapy = onmapy + 1;
-        themap[onmapy][onmapx] = "p";
+        //themap[onmapy][onmapx] = "p";
       } else {
         movementamountvert = movementamountvert - spd;
       }
@@ -242,15 +255,14 @@ void playermovements() {//movement of players
       onfloor = true;
       theplayer.sety(theplayer.gety()/25 * 25 + 25);
       spd = 0;
-      movementamountvert = movementamountvert - spd;
     } else if (spd == 0 && onfloor == false && playerinteractions(1) == "no terrain") {
       spd = -1;
       theplayer.sety(theplayer.gety() - spd);
       if (movementamountvert - spd >= 25) {
         movementamountvert = movementamountvert - spd - 25;
-        themap[onmapy][onmapx] = "a";
+        //themap[onmapy][onmapx] = "a";
         onmapy = onmapy + 1;
-        themap[onmapy][onmapx] = "p";
+        //themap[onmapy][onmapx] = "p";
       } else {
         movementamountvert = movementamountvert - spd;
       }
@@ -293,7 +305,7 @@ void playermovements() {//movement of players
     }
     if (keyLeft && playerinteractions(2) == "no terrain") {//left
       if (projectedx < 400 || projectedx > 3225) {
-        println("trigger");
+        //println("trigger");
         theplayer.setx(theplayer.getx() - 5);
       } else {
         if (lock == false) {
@@ -302,8 +314,10 @@ void playermovements() {//movement of players
         }
       }
       if (lock == false || projectedx >= 3225){
-        projectedx = projectedx - 5;
-        movementamounthorz = movementamounthorz - 5;
+        
+          projectedx = projectedx - 5;
+          movementamounthorz = movementamounthorz - 5;
+        
       }
     }
     if (keyRight && playerinteractions(3) == "no terrain") {//right
@@ -316,8 +330,10 @@ void playermovements() {//movement of players
       } else {
         shift = shift + 5;
       }
-      projectedx = projectedx + 5;
-      movementamounthorz = movementamounthorz + 5;
+      
+        projectedx = projectedx + 5;
+        movementamounthorz = movementamounthorz + 5;
+
     }
     if (keyRight && onfloor == false) {
       if (direction != "right") {
@@ -518,6 +534,7 @@ void loadplayer() {
   fill(#00ccff);
   rect(5, 30, 25, theplayer.getHP() * 25);
   imageMode(CORNER);
+  if(invuln % 3 == 0){
   if (onfloor == true) {
     if (direction == "left") {
       if (atking == true) {
@@ -534,28 +551,31 @@ void loadplayer() {
     if (direction == "right") {
       if (atking == true) {
         PImage hold = loadImage("swordright" + atknum + ".png");
-        image(hold, theplayer.getx() - 20, theplayer.gety() - 10);
+        image(hold, theplayer.getx(), theplayer.gety() - 10);
       } else {
         if (idleright == false) {
           PImage hold = loadImage("right" + rightnum + ".png");
-          image(hold, theplayer.getx() - 20, theplayer.gety()  - 10);
+          image(hold, theplayer.getx(), theplayer.gety()  - 10);
         }
         if (idleright == true) {
           PImage hold = loadImage("idleright" + idlenum + ".png");
-          image(hold, theplayer.getx() - 20, theplayer.gety() - 10);
+          image(hold, theplayer.getx(), theplayer.gety() - 10);
         }
       }
     }
   } else {
     if (direction == "right") {
       PImage hold = loadImage("jumpright" + jumpnum + ".png");
-      image(hold, theplayer.getx() - 25, theplayer.gety() - 10);
+      image(hold, theplayer.getx(), theplayer.gety() - 10);
     }
     if (direction == "left") {
       PImage hold = loadImage("jumpleft" + jumpnum + ".png");
       image(hold, theplayer.getx(), theplayer.gety() - 10);
     }
   }
+  }
+  //fill(0);
+  //rect(theplayer.getx(), theplayer.gety(), 25, 25);
 }
 
 
@@ -569,7 +589,7 @@ void displayterrain() {
    if(endy.get(a).equals(starty.get(a))){
    rect(startx.get(a) - shift, starty.get(a), endx.get(a)-startx.get(a), 20);
    }else{
-   rect(startx.get(a) - shift, starty.get(a), 20, endy.get(a)-starty.get(a));
+     rect(startx.get(a) - shift, starty.get(a), 20, endy.get(a)-starty.get(a));
    }
    }
    */
@@ -578,13 +598,11 @@ void displayterrain() {
   for (int a = 0; a < themap.length; a++) {
     for (int b = 0; b < themap[a].length; b++) {
       if (themap[a][b].equals("x")) {
-        rect(b * 25 - shift, a * 25, 25, 25);
-        /*
+        //rect(b * 25 - shift, a * 25, 25, 25);
         if(b * 25 - shift < 850 && b * 25 - shift >= -50){
-         PImage hold = loadImage("terrain.png");
-         image(hold, b * 25 - shift, a * 25);
+          
+         image(holding, b * 25 - shift, a * 25);
          }
-         */
       }
     }
   }
@@ -597,7 +615,8 @@ String terrainint(int a) {
   int holdx = projectedx;
   if (a == 0) {
     if (movementamountvert - spd <= 0) {
-      if (themap[onmapy - 1][onmapx].equals("x")) {
+     
+      if (themap[onmapy - 1][onmapx].equals("x") || (projectedx % 25 != 0 && themap[onmapy -1][onmapx + 1].equals("x"))) {
         trigger = "terrain";
       }
     }
@@ -605,7 +624,7 @@ String terrainint(int a) {
   if (a == 1) {
     boolean plustime = false;
     if (movementamountvert - spd >= 25) {
-      if (themap[onmapy + 1][onmapx].equals("x") || (projectedx % 25 != 0 && themap[onmapy + 1][onmapx + 1].equals("x"))) {
+      if (themap[onmapy + 1][projectedx /25].equals("x") || (projectedx % 25 != 0 && (themap[onmapy + 1][onmapx + 1].equals("x")))) {
         trigger = "terrain";
         movementamountvert = 25;
       }
@@ -619,23 +638,23 @@ String terrainint(int a) {
         movementamounthorz = 0;
       } else {
         movementamounthorz = 25;
-        themap[onmapy][onmapx] = "a";
+        //themap[onmapy][onmapx] = "a";
         onmapx = onmapx - 1;
-        themap[onmapy][onmapx] = "p";
+        //themap[onmapy][onmapx] = "p";
       }
     }
   }
   if (a == 3) {//terrain on right
     if (movementamounthorz == 25) {
-      if (themap[onmapy][onmapx + 1].equals("x")) {
+      if (themap[onmapy][onmapx + 2].equals("x")) {
         trigger = "terrain";
         //println("collisonright");
         movementamounthorz = 25;
       } else {
         movementamounthorz = 0;
-        themap[onmapy][onmapx] = "a";
+        //themap[onmapy][onmapx] = "a";
         onmapx = onmapx + 1;
-        themap[onmapy][onmapx] = "p";
+        //themap[onmapy][onmapx] = "p";
       }
     }
   }
