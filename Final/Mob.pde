@@ -1,10 +1,15 @@
 class Mob{
   int x;
   int y;
+  int HP;
   boolean movement;
   Mob(int a, int b){
     x = a;
     y = b;
+    HP = 2;
+  }
+  int getHP(){
+    return HP;
   }
   int getx(){
     return x;
@@ -16,6 +21,9 @@ class Mob{
     return movement;
   }
   
+  void setHP(int a ){
+    HP = a;
+  }
   void setx(int a){
     x = a;
   }

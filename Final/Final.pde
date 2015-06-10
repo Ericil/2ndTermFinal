@@ -36,6 +36,8 @@ boolean lockmore = false;
 boolean finishedloading = false;
 int loadingbosscount = 0;
 int makingcell = 375;
+boolean hit = false;
+int invuln = 0;
 void setup() {
   frameRate(60);
   currentmobs = new ArrayList<Mob>();
@@ -74,6 +76,7 @@ void setup() {
 void starting() {
   theplayer.setx(100);
   theplayer.sety(375);
+  theplayer.setHP(5);
   themap[onmapy][onmapx] = "a";
   onmapx = 4;
   onmapy = 15;
@@ -113,7 +116,7 @@ void draw() {
     displayBoss();
   } else {
     fill(0);
-    if (theplayer.gety() - spd > 450) {
+    if (theplayer.gety() - spd > 450 || theplayer.getHP() == 0) {
       starting();
     }
     if (lockmore == true) {
@@ -133,33 +136,65 @@ void draw() {
 }
 
 void combat() {
+  println("invuln: " + invuln);
+  println("HP :" + theplayer.getHP());
   if (atking == true) {
     if (direction == "right") {
-      println("atking right");
+      //println("atking right");
       for (int a = 0; a < currentmobs.size (); a++) {
-        if (projectedx < currentmobs.get(a).getx() && projectedx + 40 > currentmobs.get(a).getx() && theplayer.gety() == currentmobs.get(a).gety()) {
-          currentmobs.remove(a);
+        if (projectedx < currentmobs.get(a).getx() && projectedx + 40 > currentmobs.get(a).getx() && theplayer.gety() == currentmobs.get(a).gety() && hit == false) {
+          println("HP: " + currentmobs.get(a).getHP());
+          if(currentmobs.get(a).getHP() == 1){
+            currentmobs.remove(a);
+          }else{
+            currentmobs.get(a).setHP(currentmobs.get(a).getHP() - 1);
+          }
+          hit = true;
         }
       }
     } else {
-      for (int a = 0; a < currentmobs.size (); a++) {
-        if (projectedx > currentmobs.get(a).getx() && projectedx - 40 < currentmobs.get(a).getx() && theplayer.gety() == currentmobs.get(a).gety()) {
-          currentmobs.remove(a);
+      for (int a = 0; a < currentmobs.size(); a++) {
+        if (projectedx > currentmobs.get(a).getx() && projectedx - 40 < currentmobs.get(a).getx() && theplayer.gety() == currentmobs.get(a).gety() && hit == false) {
+          println("HP : " + currentmobs.get(a).getHP());
+          if(currentmobs.get(a).getHP() == 1){
+            currentmobs.remove(a);
+          }else{
+            currentmobs.get(a).setHP(currentmobs.get(a).getHP() - 1);
+          }
+          hit = true;
         }
       }
     }
   }
+  if(invuln == 0){
+    for (int a = 0; a < currentmobs.size(); a++){
+      if(currentmobs.get(a).getmovement() == false){
+        if(projectedx > currentmobs.get(a).getx() && projectedx - 40 < currentmobs.get(a).getx() && theplayer.gety() == currentmobs.get(a).gety()){
+          theplayer.setHP(theplayer.getHP() - 1);
+          invuln = 20;
+        }
+      }else{
+        if(projectedx < currentmobs.get(a).getx() && projectedx + 40 > currentmobs.get(a).getx() && theplayer.gety() == currentmobs.get(a).gety()){
+          theplayer.setHP(theplayer.getHP() - 1);
+          invuln = 20;
+        }
+      }
+    }
+  }else{
+    invuln--;
+  }
 }
 void playermovements() {//movement of players
   //println("lock:" + lock);
-  println("player: " + projectedx, theplayer.gety());
-  println("movementamout: " + movementamountvert);
-  println("spd: " + spd);
+  //println("player: " + projectedx, theplayer.gety());
+  //println("movementamout: " + movementamountvert);
+  //println("spd: " + spd);
   if (atking == true && onfloor) {
     if (intervalatk == 3) {
       if (atknum == 5) {
         atking = false;
         atknum = 0;
+        hit = false;
       } else {
         atknum++;
       }
@@ -187,7 +222,7 @@ void playermovements() {//movement of players
         spd--;
       }
     } else if (spd < 0 && playerinteractions(1) == "no terrain" && onfloor == false) {//jumping, going down
-    println("down");
+    //println("down");
       theplayer.sety(theplayer.gety() - spd);
       if (movementamountvert - spd >= 25) {
         movementamountvert = movementamountvert - spd - 25;
@@ -262,7 +297,7 @@ void playermovements() {//movement of players
         theplayer.setx(theplayer.getx() - 5);
       } else {
         if (lock == false) {
-          println("trigger2");
+          //println("trigger2");
           shift = shift - 5;
         }
       }
@@ -351,10 +386,10 @@ void monstermovements() {// this is for one mob right now, later on,
         currentmobs.get(a).setmovement(true);
       }
     }
-    if (currentmobs.get(a).getmovement() == false) {
-      currentmobs.get(a).setx(currentmobs.get(a).getx() + 5);
+    if (currentmobs.get(a).getmovement() == false) {//right
+      currentmobs.get(a).setx(currentmobs.get(a).getx() + 1);
     } else {
-      currentmobs.get(a).setx(currentmobs.get(a).getx() - 5);
+      currentmobs.get(a).setx(currentmobs.get(a).getx() - 1);
     }
   }
 }
@@ -444,7 +479,7 @@ void keyPressed() {
   }
   if (keyCode == 38 && onfloor) {
     keyUp = true;
-    spd = 18;
+    spd = 16;
     onfloor = false;
   }
   if (keyCode == 37) {
@@ -478,6 +513,10 @@ void keyReleased() {
 }
 
 void loadplayer() {
+    fill(0);
+  rect(0, 25, 35, theplayer.getHP() * 25 + 10);
+  fill(#00ccff);
+  rect(5, 30, 25, theplayer.getHP() * 25);
   imageMode(CORNER);
   if (onfloor == true) {
     if (direction == "left") {
@@ -576,7 +615,7 @@ String terrainint(int a) {
     if (movementamounthorz == 0) {
       if (themap[onmapy][onmapx - 1].equals("x")) {
         trigger = "terrain";
-        println("collisonleft");
+        //println("collisonleft");
         movementamounthorz = 0;
       } else {
         movementamounthorz = 25;
