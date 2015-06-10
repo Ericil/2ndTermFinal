@@ -151,8 +151,10 @@ void combat() {
   }
 }
 void playermovements() {//movement of players
-  println("lock:" + lock);
+  //println("lock:" + lock);
   println("player: " + projectedx, theplayer.gety());
+  println("movementamout: " + movementamountvert);
+  println("spd: " + spd);
   if (atking == true && onfloor) {
     if (intervalatk == 3) {
       if (atknum == 5) {
@@ -179,12 +181,13 @@ void playermovements() {//movement of players
       } else {
         movementamountvert = movementamountvert - spd;
       }
-      if (spd -2 == 0) {
+      if (spd - 2 == 0) {
         spd = -2;
       } else {
         spd--;
       }
     } else if (spd < 0 && playerinteractions(1) == "no terrain" && onfloor == false) {//jumping, going down
+    println("down");
       theplayer.sety(theplayer.gety() - spd);
       if (movementamountvert - spd >= 25) {
         movementamountvert = movementamountvert - spd - 25;
@@ -270,11 +273,8 @@ void playermovements() {//movement of players
     }
     if (keyRight && playerinteractions(3) == "no terrain") {//right
       if (projectedx < 400 || projectedx >= 3225) {
-        if (projectedx == 3325 && lock == false) {
-          if (onfloor == true) {
-            lockmore = true;
-          }
-          println("trigger");
+        if (projectedx >= 3325 && lock == false && onfloor == true) {
+          lockmore = true;
           lock = true;
         }
         theplayer.setx(theplayer.getx() + 5);
@@ -444,7 +444,7 @@ void keyPressed() {
   }
   if (keyCode == 38 && onfloor) {
     keyUp = true;
-    spd = 20;
+    spd = 18;
     onfloor = false;
   }
   if (keyCode == 37) {
@@ -560,7 +560,6 @@ String terrainint(int a) {
     if (movementamountvert - spd <= 0) {
       if (themap[onmapy - 1][onmapx].equals("x")) {
         trigger = "terrain";
-        movementamountvert = 0;
       }
     }
   }
