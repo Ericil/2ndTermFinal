@@ -19,6 +19,12 @@ BufferedReader test;
 String[][] themap;
 int movementamountvert, movementamounthorz;
 Boss boss = new Boss();
+int bossidleno = 0;
+int bosschargeno = 0;
+int bosschargedelay = 0;
+boolean rewind = false;
+int bossidle = 0;
+int bossidledelay = 0;
 int timer = 0;
 int counter = 0;
 int counter2 = 0;
@@ -135,7 +141,7 @@ void draw() {
 void combat() {
   if (atking == true) {
     if (direction == "right") {
-      println("atking right");
+      //println("atking right");
       for (int a = 0; a < currentmobs.size (); a++) {
         if (projectedx < currentmobs.get(a).getx() && projectedx + 40 > currentmobs.get(a).getx() && theplayer.gety() == currentmobs.get(a).gety()) {
           currentmobs.remove(a);
@@ -151,8 +157,8 @@ void combat() {
   }
 }
 void playermovements() {//movement of players
-  println("lock:" + lock);
-  println("player: " + projectedx, theplayer.gety());
+  //println("lock:" + lock);
+  //println("player: " + projectedx, theplayer.gety());
   if (atking == true && onfloor) {
     if (intervalatk == 3) {
       if (atknum == 5) {
@@ -255,11 +261,11 @@ void playermovements() {//movement of players
     }
     if (keyLeft && playerinteractions(2) == "no terrain") {//left
       if (projectedx < 400 || projectedx > 3225) {
-        println("trigger");
+        //println("trigger");
         theplayer.setx(theplayer.getx() - 5);
       } else {
         if (lock == false) {
-          println("trigger2");
+          //println("trigger2");
           shift = shift - 5;
         }
       }
@@ -274,7 +280,7 @@ void playermovements() {//movement of players
           if (onfloor == true) {
             lockmore = true;
           }
-          println("trigger");
+          //println("trigger");
           lock = true;
         }
         theplayer.setx(theplayer.getx() + 5);
@@ -444,7 +450,7 @@ void keyPressed() {
   }
   if (keyCode == 38 && onfloor) {
     keyUp = true;
-    spd = 20;
+    spd = 15;
     onfloor = false;
   }
   if (keyCode == 37) {
@@ -577,7 +583,7 @@ String terrainint(int a) {
     if (movementamounthorz == 0) {
       if (themap[onmapy][onmapx - 1].equals("x")) {
         trigger = "terrain";
-        println("collisonleft");
+        //println("collisonleft");
         movementamounthorz = 0;
       } else {
         movementamounthorz = 25;
@@ -624,20 +630,58 @@ void loadfinal() {
   }
 }
 void displayBoss() {
-  rect(boss.getx(), boss.gety(), 50, 50);
   int start = millis();
+  if (start-timer < 2000){
+    if (boss.getside()){
+      PImage bossidle = loadImage("idler"+bossidleno+".png");
+      image(bossidle,boss.getx(),boss.gety());
+      if (start - bossidledelay > 20){
+      bossidleno++;
+      bossidledelay = millis();
+      }
+      if (bossidleno == 8){
+        bossidleno = 0;
+      }
+    }else{
+      PImage bossidle = loadImage("idlel"+bossidleno+".png");
+      image(bossidle,boss.getx(),boss.gety());
+      if (start - bossidledelay > 20){
+      bossidleno++;
+      bossidledelay = millis();
+      }
+      if (bossidleno == 8){
+        bossidleno = 0;
+      }
+    }
+  }
+  if (start-timer > 2000 && start-timer < 3000){
+    PImage bosscharge = loadImage("charge"+bosschargeno+".png");
+    image(bosscharge,boss.getx(),boss.gety());
+    if (start - bosschargedelay > 50){
+    if (rewind){
+      if (bosschargeno == 0){
+        rewind = false;
+        bosschargeno++;
+      }
+      bosschargeno--;
+    }else{
+      if (bosschargeno == 3){
+        rewind = true;
+        bosschargeno--;
+      }
+      bosschargeno++;
+    }
+    bosschargedelay = millis();
+    }
+  }
   if ((start-timer) > 3000) {
     if (bossprojectile || projectiles.size() > 0) {
-      System.out.println("projectile attack");
-      System.out.println(timer2);
       if (countdown == 3) {
-        projectiles.add(new Projectile(boss.getx(), boss.gety(), boss.getside()));
-        System.out.println("projectile added1");
+        projectiles.add(new Projectile(boss.getx(), boss.gety()+20, boss.getside()));
         timer2 = millis();
         countdown--;
       } else if (countdown > 0 && start-timer2 > 1000) {
-        projectiles.add(new Projectile(boss.getx(), boss.gety(), boss.getside()));
-        System.out.println("projectile added2");
+        projectiles.add(new Projectile(boss.getx(), boss.gety()+20, boss.getside()));
         timer2 = millis();
         countdown--;
       } else if (countdown == 0 && projectiles.size() == 0) {
@@ -648,11 +692,14 @@ void displayBoss() {
       }
       if (projectiles.size() > 0) {
         for (int i = 0; i<projectiles.size (); i++) {
-          System.out.println(projectiles.get(i).getx()+","+projectiles.get(i).gety());
-          ellipse(projectiles.get(i).getx(), projectiles.get(i).gety(), 10, 10);
+          ellipse(projectiles.get(i).getx(), projectiles.get(i).gety(), 30, 15);
           if (!projectiles.get(i).getside()) {
+            PImage fire = loadImage("firel.png");
+            image(fire,projectiles.get(i).getx(),projectiles.get(i).gety());
             projectiles.get(i).setx(projectiles.get(i).getx()+10);
           } else {
+            PImage fire = loadImage("firer.png");
+            image(fire,projectiles.get(i).getx(),projectiles.get(i).gety());
             projectiles.get(i).setx(projectiles.get(i).getx()-10);
           }
           if (projectiles.get(i).getx() > 700 || projectiles.get(i).getx() < 100) {
@@ -662,7 +709,7 @@ void displayBoss() {
       }
     } else if (boss.getx() == 700 || boss.getx() == 100) {
       int action, action2, action3;
-      if (counter < 6) {
+      if (counter < 5 && counter2 < 7) {
         action = chance.nextInt(5-counter);
         action2 = chance.nextInt(7-counter2);
         action3 = chance.nextInt(9-counter3);
@@ -715,6 +762,8 @@ void displayBoss() {
       bossjump = false;
       bossprojectile = false;
       boss.setspd(0);
+      bossidleno = 0;
+      bosschargeno = 0;
     } else if (boss.getx() == 700 && !boss.getside()) {
       boss.sety(350);
       boss.switchside();
@@ -726,6 +775,8 @@ void displayBoss() {
       bossjump = false;
       bossprojectile = false;
       boss.setspd(0);
+      bossidleno = 0;
+      bosschargeno = 0;
     }
   }
 }
