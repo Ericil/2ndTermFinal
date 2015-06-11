@@ -121,8 +121,7 @@ void draw() {
    }
    }
    */
-  background(255);
-  image(background, 0, -200);
+  image(background, 0, -400);
   int a = 1;
   //enemymovements();//movement of the enemies
   if (a == 0) {
@@ -538,9 +537,9 @@ void keyReleased() {
 
 void loadplayer() {
     fill(0);
-  rect(0, 25, 35, theplayer.getHP() * 25 + 10);
+  rect(10, 10,theplayer.getHP() * 25 + 10, 35);
   fill(#00ccff);
-  rect(5, 30, 25, theplayer.getHP() * 25);
+  rect(15, 15, theplayer.getHP() * 25, 25);
   imageMode(CORNER);
   if(invuln % 3 == 0){
   if (onfloor == true) {
