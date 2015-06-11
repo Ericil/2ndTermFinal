@@ -138,6 +138,8 @@ void draw() {
     monstermovements();
     if(finishedloading == true){
       displayBoss();
+    }else{
+      timer = millis();
     }
     loadmonsters();
     loadplayer();
@@ -730,6 +732,25 @@ void displayBoss() {
   }
   if ((start-timer) > 3000) {
     if (bossprojectile || projectiles.size() > 0) {
+      PImage bossproj;
+      if (boss.getside()){
+      if (countdown > 1){
+        bossproj = loadImage("projectiler2.png");
+      }else if (countdown > 0){
+        bossproj = loadImage("projectiler8.png");
+      }else{
+        bossproj = loadImage("projectiler14.png");
+      }
+      }else{
+        if (countdown > 1){
+        bossproj = loadImage("projectilel2.png");
+      }else if (countdown > 0){
+        bossproj = loadImage("projectilel8.png");
+      }else{
+        bossproj = loadImage("projectilel14.png");
+      }
+      }
+      image(bossproj,boss.getx(),boss.gety());
       if (countdown == 3) {
         projectiles.add(new Projectile(boss.getx(), boss.gety()+20, boss.getside()));
         timer2 = millis();
@@ -804,6 +825,14 @@ void displayBoss() {
         boss.setspd(boss.getspd() - 4);
       }
       boss.sety(boss.gety()-boss.getspd());
+    }else if (!bossprojectile){
+      PImage dash;
+      if (boss.getside()){
+      dash = loadImage("dashright.png");
+      }else{
+        dash = loadImage("dashleft.png");
+      }
+      image(dash,boss.getx(),boss.gety());
     }
     if (boss.getx() == 100 && boss.getside()) {
       boss.sety(350);
