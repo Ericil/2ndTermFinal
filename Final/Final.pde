@@ -203,14 +203,7 @@ void combat() {
   }
 }
 void playermovements() {//movement of players
-  //println("lock:" + lock);
-  //println("player: " + projectedx, theplayer.gety());
-<<<<<<< HEAD
-  //println("onmapxy: " + onmapx, onmapy);
-  //println("movementamout: " + movementamountvert);
-  //println("spd: " + spd);
-=======
->>>>>>> origin/Jason
+
   if (atking == true && onfloor) {
     if (intervalatk == 3) {
       if (atknum == 5) {
@@ -331,16 +324,9 @@ void playermovements() {//movement of players
     }
     if (keyRight && playerinteractions(3) == "no terrain") {//right
       if (projectedx < 400 || projectedx >= 3225) {
-<<<<<<< HEAD
+
         if (projectedx >= 3325 && lock == false && onfloor == true) {
           lockmore = true;
-=======
-        if (projectedx == 3325 && lock == false) {
-          if (onfloor == true) {
-            lockmore = true;
-          }
-          //println("trigger");
->>>>>>> origin/Jason
           lock = true;
         }
         theplayer.setx(theplayer.getx() + 5);
@@ -512,11 +498,7 @@ void keyPressed() {
   }
   if (keyCode == 38 && onfloor) {
     keyUp = true;
-<<<<<<< HEAD
     spd = 16;
-=======
-    spd = 15;
->>>>>>> origin/Jason
     onfloor = false;
   }
   if (keyCode == 37) {
