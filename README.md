@@ -1,6 +1,31 @@
 2nd Term Final Project    
 Group Name: Megaman CS    
 
+6/10/15
+Updates:    
+- another merge between master and Jason’s branch    
+- added HP bar    
+- mobs can now damage player    
+- added flickering (and invulnerability during this time)    
+- added boss images    
+- animated boss    
+- added background    
+
+Bugfixes:    
+- fixed a bug where jumping up into terrain would set the player 1 block lower than the player should be    
+- fixed a bug where the boss and boss room would not load if you jumped into the room instead of walked    
+- fixed the terrain bugs that have been annoying me since the beginning(created because the hitbox is from the top-left corner)    
+- fixed the boss damaging you when the boss room is generating and centering    
+
+Need to do:    
+- moat animations (for enemies and player)    
+- maybe a shoot, can just use what the boss does    
+- combat    
+- another level    
+- extending this level    
+- maybe, hopefully a parallax background?    
+- polishing    
+
 6/8/15    
 Updates:    
 - added boss to the overall level    
@@ -23,6 +48,8 @@ Need to do:
 - polishing    
 
 6/6/15
+Demo is at branch demo    
+
 Updates:    
 - merged 2 branches together!    
 - currently there is an int that acts as a switch in the draw() that allows either the player to be shown or the boss, have not combined it yet    
