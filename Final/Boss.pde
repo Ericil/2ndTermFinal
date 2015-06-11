@@ -1,14 +1,19 @@
 class Boss{
  int x,y,spd;
  boolean side;
+ int HP;
  
  Boss(){
   x = 700;
   y = 350;
   spd = 0;
   side = true;
+  HP = 10;
  }
 
+ int getHP(){
+   return HP;
+ }
  int getx(){
    return x;
  }
@@ -22,6 +27,9 @@ class Boss{
    return side;
  }
  
+ void setHP(int a ){
+   HP = a;
+ }
  void setx(int a){
    x = a;
  }

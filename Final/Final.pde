@@ -18,7 +18,7 @@ int shift;
 BufferedReader test;
 String[][] themap;
 int movementamountvert, movementamounthorz;
-Boss boss = new Boss();
+Boss boss;
 int bossidleno = 0;
 int bosschargeno = 0;
 int bosschargedelay = 0;
@@ -46,6 +46,7 @@ boolean hit = false;
 int invuln = 0;
 PImage holding;
 PImage background;
+boolean killed = false;
 void setup() {
   holding = loadImage("terrain.png");
   background = loadImage("backgroundtest.jpg");
@@ -84,6 +85,35 @@ void setup() {
 }
 
 void starting() {
+  loadingbosscount = 0;
+  makingcell = 375;
+  currentmobs = new ArrayList<Mob>();
+  test = createReader("map.txt");
+  String ugh = null;
+  String[] hold = new String[20];
+  try {
+    for (int a = 0; (ugh = test.readLine ()) != null; a++) {
+      hold[a] = ugh;
+    }
+  }
+  catch(IOException e) {
+  }
+  themap = new String[20][160];
+  for (int a = 0; a < hold.length; a++) {
+    for (int b = 0; b < 160; b++) {
+      themap[a][b] = hold[a].substring(b, b+1);
+      if (themap[a][b].equals("p")) {
+        theplayer.setx(b * 25);
+        theplayer.sety(a * 25);
+        onmapx = b;
+        onmapy = a;
+      }
+      if (themap[a][b].equals("m")) {
+        currentmobs.add(new Mob(b * 25, a * 25));
+      }
+    }
+  }
+  killed = false;
   theplayer.setx(100);
   theplayer.sety(375);
   theplayer.setHP(5);
@@ -111,6 +141,7 @@ void starting() {
   lock = false;
   lockmore = false;
   finishedloading = false;
+  boss = new Boss();
 }
 
 void draw() {
@@ -138,10 +169,12 @@ void draw() {
     playermovements();//movement of the player
     combat();
     monstermovements();
-    if(finishedloading == true){
+    if(finishedloading == true && boss != null){
       displayBoss();
-    }else{
+    }else if (boss != null){
       timer = millis();
+    }else{
+      starting();
     }
     loadmonsters();
     loadplayer();
@@ -166,6 +199,17 @@ void combat() {
           hit = true;
         }
       }
+      if(boss != null){
+      if ((theplayer.getx() < boss.getx() && theplayer.getx() + 60 > boss.getx() && theplayer.gety() == boss.gety() + 25) && hit == false){
+        if(boss.getHP() == 1){
+          boss = null;
+          killed = true;
+        }else{
+          boss.setHP(boss.getHP() - 1);
+        }
+        hit = true;
+      }
+      }
     } else {
       for (int a = 0; a < currentmobs.size(); a++) {
         if (projectedx > currentmobs.get(a).getx() && projectedx - 40 < currentmobs.get(a).getx() && theplayer.gety() == currentmobs.get(a).gety() && hit == false) {
@@ -177,6 +221,17 @@ void combat() {
           }
           hit = true;
         }
+      }
+      if(boss != null){
+      if ((theplayer.getx() > boss.getx() && theplayer.getx() - 60 < boss.getx() && theplayer.gety() == boss.gety() + 25) && hit == false){
+        if(boss.getHP() == 1){
+          boss = null;
+          killed = true;
+        }else{
+          boss.setHP(boss.getHP() - 1);
+        }
+        hit = true;
+      }
       }
     }
   }
@@ -194,7 +249,7 @@ void combat() {
         }
       }
     }
-    if(finishedloading){
+    if(finishedloading && boss != null){
     if((theplayer.getx() > boss.getx() && theplayer.getx() - 40 < boss.getx() && theplayer.gety() == boss.gety() + 25) ||
        (theplayer.getx() < boss.getx() && theplayer.getx() + 40 > boss.getx() && theplayer.gety() == boss.gety() + 25)){
          theplayer.setHP(theplayer.getHP() - 1);
@@ -537,9 +592,12 @@ void keyReleased() {
 
 void loadplayer() {
     fill(0);
-  rect(10, 10,theplayer.getHP() * 25 + 10, 35);
+  rect(10, 10, 35, theplayer.getHP() * 15 + 10);
   fill(#00ccff);
-  rect(15, 15, theplayer.getHP() * 25, 25);
+  for(int a = 1; a <= theplayer.getHP(); a++){
+    stroke(0);
+    rect(15, a * 15, 25, 15);
+  }
   imageMode(CORNER);
   if(invuln % 3 == 0){
   if (onfloor == true) {
@@ -688,6 +746,13 @@ void loadfinal() {
   }
 }
 void displayBoss() {
+  fill(0);
+  rect(750, 10, 35, boss.getHP() * 15 + 10);
+  fill(#ff0000);
+  for(int a = 1; a <= boss.getHP(); a++){
+    stroke(0);
+    rect(755, a * 15, 25, 15);
+  }
   int start = millis();
   println(start-timer);
   if (start-timer < 2000){
