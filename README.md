@@ -1,6 +1,22 @@
 2nd Term Final Project    
 Group Name: Megaman CS    
 
+6/11/15    
+Updates:    
+- boss has HP    
+- boss has HP bar    
+- boss is killable    
+- when you win, currently sends you back to the start    
+
+Need to do:    
+- the jumping animation for the boss    
+- maybe a shoot    
+- another level    
+- extending first level    
+- parallax background maybe??    
+- music    
+- polishing    
+
 6/10/15
 Updates:    
 - another merge between master and Jason’s branch    
@@ -18,7 +34,7 @@ Bugfixes:
 - fixed the boss damaging you when the boss room is generating and centering    
 
 Need to do:    
-- moat animations (for enemies and player)    
+- moar animations (for enemies and player)    
 - maybe a shoot, can just use what the boss does    
 - combat    
 - another level    
