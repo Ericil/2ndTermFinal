@@ -170,6 +170,7 @@ void draw() {
 }
 
 void combat() {
+  println("playery: " + theplayer.gety());
   //println("invuln: " + invuln);
   //println("HP :" + theplayer.getHP());
   if (atking == true) {
@@ -224,8 +225,11 @@ void combat() {
   }
   for (int i = 0; i < projectiles.size (); i++) {
     for (int a = 0; a < currentmobs.size () && projectiles.size() != 0; a++) {
+      println("mobsy: " + currentmobs.get(a).gety());
+      println("projectiley: " + projectiles.get(i).gety());
       if (projectiles.get(i).getside() == false) {
-        if (projectiles.get(i).getx() + shift + 5 >= currentmobs.get(a).getx() && projectiles.get(i).getx()+ shift - 5 <= currentmobs.get(a).getx()) {
+        if (projectiles.get(i).getx() + shift + 5 >= currentmobs.get(a).getx() && projectiles.get(i).getx()+ shift - 5 <= currentmobs.get(a).getx()
+            && projectiles.get(i).gety() == currentmobs.get(a).gety()) {
           currentmobs.remove(a);
           projectiles.remove(i);
         } else {
@@ -237,7 +241,8 @@ void combat() {
           }
         }
       } else {
-        if (projectiles.get(i).getx() + shift - 5 <= currentmobs.get(a).getx() && projectiles.get(i).getx() + shift + 5 > currentmobs.get(a).getx()) {
+        if (projectiles.get(i).getx() + shift - 5 <= currentmobs.get(a).getx() && projectiles.get(i).getx() + shift + 5 > currentmobs.get(a).getx()
+            && projectiles.get(i).gety() == currentmobs.get(a).gety()) {
           currentmobs.remove(a);
           projectiles.remove(i);
         } else {
@@ -924,7 +929,7 @@ void displayBoss() {
       }
     }
     if (bossair) {
-      boss.sety(200);
+      boss.sety(300);
     }
     if (bossjump) {
       if (boss.gety() == 350) {
@@ -932,6 +937,61 @@ void displayBoss() {
       } else {
         boss.setspd(boss.getspd() - 4);
       }
+      PImage jumping;
+      if(boss.getside()){
+        if(boss.getspd() == 40){
+          jumping = loadImage("jumpr.png");
+        }else if (boss.getspd() < 40 && boss.getspd() >= 32){
+          jumping = loadImage("jumpr0.png");
+        }else if (boss.getspd() < 32 && boss.getspd() >= 24){
+          jumping = loadImage("jumpr1.png");
+        }else if (boss.getspd() < 24 && boss.getspd() >= 16){
+          jumping = loadImage("jumpr2.png");
+        }else if (boss.getspd() < 16 && boss.getspd() >= 8){
+          jumping = loadImage("jumpr3.png");
+        }else if (boss.getspd() < 8 && boss.getspd() >= 0){
+          jumping = loadImage("jumpr4.png");
+        }else if (boss.getspd() < 0 && boss.getspd() >= -8){
+          jumping = loadImage("jumpr5.png");
+        }else if (boss.getspd() < -8 && boss.getspd() >= -16){
+          jumping = loadImage("jumpr6.png");
+        }else if (boss.getspd() < -16 && boss.getspd() >= -24){
+          jumping = loadImage("jumpr7.png");
+        }else if (boss.getspd() < -24 && boss.getspd() >= -32){
+          jumping = loadImage("jumpr8.png");
+        }else if (boss.getspd() < -32 && boss.getspd() > -40){
+          jumping = loadImage("jumpr9.png");
+        }else{
+          jumping = loadImage("jumpr10.png");
+        }
+      }else{
+        if(boss.getspd() == 40){
+          jumping = loadImage("jumpl.png");
+        }else if (boss.getspd() < 40 && boss.getspd() >= 32){
+          jumping = loadImage("jumpl0.png");
+        }else if (boss.getspd() < 32 && boss.getspd() >= 24){
+          jumping = loadImage("jumpl1.png");
+        }else if (boss.getspd() < 24 && boss.getspd() >= 16){
+          jumping = loadImage("jumpl2.png");
+        }else if (boss.getspd() < 16 && boss.getspd() >= 8){
+          jumping = loadImage("jumpl3.png");
+        }else if (boss.getspd() < 8 && boss.getspd() >= 0){
+          jumping = loadImage("jumpl4.png");
+        }else if (boss.getspd() < 0 && boss.getspd() >= -8){
+          jumping = loadImage("jumpl5.png");
+        }else if (boss.getspd() < -8 && boss.getspd() >= -16){
+          jumping = loadImage("jumpl6.png");
+        }else if (boss.getspd() < -16 && boss.getspd() >= -24){
+          jumping = loadImage("jumpl7.png");
+        }else if (boss.getspd() < -24 && boss.getspd() >= -32){
+          jumping = loadImage("jumpl8.png");
+        }else if (boss.getspd() < -32 && boss.getspd() > -40){
+          jumping = loadImage("jumpl9.png");
+        }else{
+          jumping = loadImage("jumpl10.png");
+        }
+      }
+      image(jumping, boss.getx(), boss.gety());
       boss.sety(boss.gety()-boss.getspd());
     } else if (!bossprojectile) {
       PImage dash;
