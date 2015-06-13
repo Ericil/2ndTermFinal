@@ -60,12 +60,12 @@ void setup() {
   theplayer = new Player();
   starting();
   size(800, 500);
+  killed = false;
 }
 
 void starting() {
   loadingbosscount = 0;
   makingcell = 375;
-  killed = false;
   currentmobs = new ArrayList<Mob>();
   if (killed == false) {
     test = createReader("map.txt");
@@ -96,7 +96,6 @@ void starting() {
       }
     }
   }
-  killed = false;
   theplayer.setx(100);
   theplayer.sety(375);
   theplayer.setHP(5);
@@ -127,7 +126,7 @@ void starting() {
   boss = new Boss();
   autoplayer = 0;
   removeblocks = 375;
-  bulletamount = 5;
+  bulletamount = 20;
 }
 
 void draw() {
@@ -229,7 +228,7 @@ void combat() {
       //println("mobsy: " + currentmobs.get(a).gety());
       //println("projectiley: " + projectiles.get(i).gety());
       if (projectiles.get(i).getside() == false) {
-        if (projectiles.get(i).getx() + shift + 5 >= currentmobs.get(a).getx() && projectiles.get(i).getx()+ shift - 5 <= currentmobs.get(a).getx()
+        if (projectiles.get(i).getx() + shift + 6 >= currentmobs.get(a).getx() && projectiles.get(i).getx()+ shift - 6 <= currentmobs.get(a).getx()
             && projectiles.get(i).gety() == currentmobs.get(a).gety()) {
           currentmobs.remove(a);
           projectiles.remove(i);
@@ -237,12 +236,12 @@ void combat() {
           PImage fire = loadImage("firel.png");
           image(fire, projectiles.get(i).getx(), projectiles.get(i).gety());
           projectiles.get(i).setx(projectiles.get(i).getx()+1);
-          if (projectiles.get(i).getx() > 700 || projectiles.get(i).getx() < 100) {
+          if (projectiles.get(i).getx() > 790 || projectiles.get(i).getx() < 10) {
             projectiles.remove(i);
           }
         }
       } else {
-        if (projectiles.get(i).getx() + shift - 5 <= currentmobs.get(a).getx() && projectiles.get(i).getx() + shift + 5 > currentmobs.get(a).getx()
+        if (projectiles.get(i).getx() + shift - 6 <= currentmobs.get(a).getx() && projectiles.get(i).getx() + shift + 6 > currentmobs.get(a).getx()
             && projectiles.get(i).gety() == currentmobs.get(a).gety()) {
           currentmobs.remove(a);
           projectiles.remove(i);
@@ -250,7 +249,46 @@ void combat() {
           PImage fire = loadImage("firer.png");
           image(fire, projectiles.get(i).getx(), projectiles.get(i).gety());
           projectiles.get(i).setx(projectiles.get(i).getx()-1);
-          if (projectiles.get(i).getx() > 700 || projectiles.get(i).getx() < 100) {
+          if (projectiles.get(i).getx() > 790 || projectiles.get(i).getx() < 10) {
+            projectiles.remove(i);
+          }
+        }
+      }
+    }
+    if(projectiles.size() != 0 && finishedloading == true && boss != null){
+    if(projectiles.get(i).getside() == false){
+      if (projectiles.get(i).getx() + 5 >= boss.getx() && projectiles.get(i).getx() - 5 <= boss.getx()
+            && projectiles.get(i).gety() == boss.gety() + 25) {
+          if (boss.getHP() == 1) {
+            boss = null;
+            killed = true;
+          } else {
+            boss.setHP(boss.getHP() - 1);
+          }
+          projectiles.remove(i);
+        } else {
+          PImage fire = loadImage("firel.png");
+          image(fire, projectiles.get(i).getx(), projectiles.get(i).gety());
+          projectiles.get(i).setx(projectiles.get(i).getx()+1);
+          if (projectiles.get(i).getx() > 790 || projectiles.get(i).getx() < 10) {
+            projectiles.remove(i);
+          }
+        }
+      } else {
+        if (projectiles.get(i).getx() - 5 <= boss.getx() && projectiles.get(i).getx() + 5 > boss.getx()
+            && projectiles.get(i).gety() == boss.gety() + 25) {
+          if (boss.getHP() == 1) {
+            boss = null;
+            killed = true;
+          } else {
+            boss.setHP(boss.getHP() - 1);
+          }
+          projectiles.remove(i);
+        } else {
+          PImage fire = loadImage("firer.png");
+          image(fire, projectiles.get(i).getx(), projectiles.get(i).gety());
+          projectiles.get(i).setx(projectiles.get(i).getx()-1);
+          if (projectiles.get(i).getx() > 790 || projectiles.get(i).getx() < 10) {
             projectiles.remove(i);
           }
         }
@@ -279,10 +317,11 @@ void combat() {
         println("hit");
       }
       for (int a = 0; a < projectiles.size (); a++) {
-        if (projectiles.get(a).getx() + 10 >=theplayer.getx() && projectiles.get(a).getx() - 10 <= theplayer.getx()) {
-          println("projectilexy: " + projectiles.get(a).getx(), projectiles.get(a).gety());
+        if (projectiles.get(a).getx() + 5 >=theplayer.getx() && projectiles.get(a).getx() - 5 <= theplayer.getx()) {
+          //println("projectilexy: " + projectiles.get(a).getx(), projectiles.get(a).gety());
           theplayer.setHP(theplayer.getHP() - 1);
           invuln = 99;
+          projectiles.remove(a);
         }
       }
     }
@@ -581,9 +620,9 @@ String playerinteractions(int a) {
 void keyPressed() {
   if (keyCode == 83 && onfloor && bulletamount != 0) {
     if (direction == "right") {
-      projectiles.add(new Projectile(theplayer.getx(), theplayer.gety(), false));
+      projectiles.add(new Projectile(theplayer.getx() + 6, theplayer.gety(), false));
     } else {
-      projectiles.add(new Projectile(theplayer.getx(), theplayer.gety(), true));
+      projectiles.add(new Projectile(theplayer.getx() - 6, theplayer.gety(), true));
     }
     bulletamount--;
   }
@@ -891,7 +930,7 @@ void displayBoss() {
             image(fire, projectiles.get(i).getx(), projectiles.get(i).gety());
             projectiles.get(i).setx(projectiles.get(i).getx()-10);
           }
-          if (projectiles.get(i).getx() > 700 || projectiles.get(i).getx() < 100) {
+          if (projectiles.get(i).getx() > 790 || projectiles.get(i).getx() < 10) {
             projectiles.remove(i);
           }
         }
