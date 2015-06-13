@@ -65,6 +65,7 @@ void setup() {
 void starting() {
   loadingbosscount = 0;
   makingcell = 375;
+  killed = false;
   currentmobs = new ArrayList<Mob>();
   if (killed == false) {
     test = createReader("map.txt");
@@ -170,7 +171,7 @@ void draw() {
 }
 
 void combat() {
-  println("playery: " + theplayer.gety());
+  //println("playery: " + theplayer.gety());
   //println("invuln: " + invuln);
   //println("HP :" + theplayer.getHP());
   if (atking == true) {
@@ -178,7 +179,7 @@ void combat() {
       //println("atking right");
       for (int a = 0; a < currentmobs.size (); a++) {
         if (projectedx < currentmobs.get(a).getx() && projectedx + 50 > currentmobs.get(a).getx() && theplayer.gety() == currentmobs.get(a).gety() && hit == false) {
-          println("HP: " + currentmobs.get(a).getHP());
+          //println("HP: " + currentmobs.get(a).getHP());
           if (currentmobs.get(a).getHP() == 1) {
             currentmobs.remove(a);
           } else {
@@ -201,7 +202,7 @@ void combat() {
     } else {
       for (int a = 0; a < currentmobs.size (); a++) {
         if (projectedx > currentmobs.get(a).getx() && projectedx - 50 < currentmobs.get(a).getx() && theplayer.gety() == currentmobs.get(a).gety() && hit == false) {
-          println("HP : " + currentmobs.get(a).getHP());
+          //println("HP : " + currentmobs.get(a).getHP());
           if (currentmobs.get(a).getHP() == 1) {
             currentmobs.remove(a);
           } else {
@@ -225,8 +226,8 @@ void combat() {
   }
   for (int i = 0; i < projectiles.size (); i++) {
     for (int a = 0; a < currentmobs.size () && projectiles.size() != 0; a++) {
-      println("mobsy: " + currentmobs.get(a).gety());
-      println("projectiley: " + projectiles.get(i).gety());
+      //println("mobsy: " + currentmobs.get(a).gety());
+      //println("projectiley: " + projectiles.get(i).gety());
       if (projectiles.get(i).getside() == false) {
         if (projectiles.get(i).getx() + shift + 5 >= currentmobs.get(a).getx() && projectiles.get(i).getx()+ shift - 5 <= currentmobs.get(a).getx()
             && projectiles.get(i).gety() == currentmobs.get(a).gety()) {
@@ -937,6 +938,7 @@ void displayBoss() {
       } else {
         boss.setspd(boss.getspd() - 4);
       }
+      
       PImage jumping;
       if(boss.getside()){
         if(boss.getspd() == 40){
@@ -992,6 +994,7 @@ void displayBoss() {
         }
       }
       image(jumping, boss.getx(), boss.gety());
+      
       boss.sety(boss.gety()-boss.getspd());
     } else if (!bossprojectile) {
       PImage dash;
