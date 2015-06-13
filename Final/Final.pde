@@ -49,6 +49,7 @@ PImage background;
 boolean killed = false;
 int autoplayer;
 int removeblocks;
+int bulletamount;
 void setup() {
   holding = loadImage("terrain.png");
   background = loadImage("backgroundtest.jpg");
@@ -65,9 +66,9 @@ void starting() {
   loadingbosscount = 0;
   makingcell = 375;
   currentmobs = new ArrayList<Mob>();
-  if(killed == false){
-  test = createReader("map.txt");
-  }else{
+  if (killed == false) {
+    test = createReader("map.txt");
+  } else {
     test = createReader("map2.txt");
   }
   String ugh = null;
@@ -125,6 +126,7 @@ void starting() {
   boss = new Boss();
   autoplayer = 0;
   removeblocks = 375;
+  bulletamount = 5;
 }
 
 void draw() {
@@ -152,19 +154,18 @@ void draw() {
     playermovements();//movement of the player
     combat();
     monstermovements();
-    if(finishedloading == true && boss != null){
+    if (finishedloading == true && boss != null) {
       displayBoss();
-    }else if (boss != null){
+    } else if (boss != null) {
       timer = millis();
-    }else{
+    } else {
       killedfirstboss();
-      if(theplayer.getx() == width - 25){
+      if (theplayer.getx() == width - 25) {
         starting();
       }
     }
     loadmonsters();
     loadplayer();
-    
   }
 }
 
@@ -177,119 +178,115 @@ void combat() {
       for (int a = 0; a < currentmobs.size (); a++) {
         if (projectedx < currentmobs.get(a).getx() && projectedx + 50 > currentmobs.get(a).getx() && theplayer.gety() == currentmobs.get(a).gety() && hit == false) {
           println("HP: " + currentmobs.get(a).getHP());
-          if(currentmobs.get(a).getHP() == 1){
+          if (currentmobs.get(a).getHP() == 1) {
             currentmobs.remove(a);
-          }else{
+          } else {
             currentmobs.get(a).setHP(currentmobs.get(a).getHP() - 1);
           }
           hit = true;
         }
       }
-      if(boss != null){
-      if ((theplayer.getx() < boss.getx() && theplayer.getx() + 60 > boss.getx() && theplayer.gety() == boss.gety() + 25) && hit == false){
-        if(boss.getHP() == 1){
-          boss = null;
-          killed = true;
-        }else{
-          boss.setHP(boss.getHP() - 1);
+      if (boss != null) {
+        if ((theplayer.getx() < boss.getx() && theplayer.getx() + 60 > boss.getx() && theplayer.gety() == boss.gety() + 25) && hit == false) {
+          if (boss.getHP() == 1) {
+            boss = null;
+            killed = true;
+          } else {
+            boss.setHP(boss.getHP() - 1);
+          }
+          hit = true;
         }
-        hit = true;
-      }
       }
     } else {
-      for (int a = 0; a < currentmobs.size(); a++) {
+      for (int a = 0; a < currentmobs.size (); a++) {
         if (projectedx > currentmobs.get(a).getx() && projectedx - 50 < currentmobs.get(a).getx() && theplayer.gety() == currentmobs.get(a).gety() && hit == false) {
           println("HP : " + currentmobs.get(a).getHP());
-          if(currentmobs.get(a).getHP() == 1){
+          if (currentmobs.get(a).getHP() == 1) {
             currentmobs.remove(a);
-          }else{
+          } else {
             currentmobs.get(a).setHP(currentmobs.get(a).getHP() - 1);
           }
           hit = true;
         }
       }
-      if(boss != null){
-      if ((theplayer.getx() > boss.getx() && theplayer.getx() - 60 < boss.getx() && theplayer.gety() == boss.gety() + 25) && hit == false){
-        if(boss.getHP() == 1){
-          boss = null;
-          killed = true;
-        }else{
-          boss.setHP(boss.getHP() - 1);
+      if (boss != null) {
+        if ((theplayer.getx() > boss.getx() && theplayer.getx() - 60 < boss.getx() && theplayer.gety() == boss.gety() + 25) && hit == false) {
+          if (boss.getHP() == 1) {
+            boss = null;
+            killed = true;
+          } else {
+            boss.setHP(boss.getHP() - 1);
+          }
+          hit = true;
         }
-        hit = true;
-      }
       }
     }
   }
-  for (int i = 0; i < projectiles.size(); i++) {
-    for(int a = 0; a < currentmobs.size() && projectiles.size() != 0; a++){
-          if (projectiles.get(i).getside() == false) {
-            if(projectiles.get(i).getx() + 5 >= currentmobs.get(a).getx() && projectiles.get(i).getx() - 5 <= currentmobs.get(a).getx()){
-              if(currentmobs.get(a).getHP() == 1){
-                currentmobs.remove(a);
-              }else{
-              currentmobs.get(a).setHP(currentmobs.get(a).getHP());
-              }
-            }
-            PImage fire = loadImage("firel.png");
-            image(fire,projectiles.get(i).getx(),projectiles.get(i).gety());
-            projectiles.get(i).setx(projectiles.get(i).getx()+1);
-            if (projectiles.get(i).getx() > 700 || projectiles.get(i).getx() < 100) {
-            projectiles.remove(i);
-          }
-          } else {
-            if(projectiles.get(i).getx() - 5 <= currentmobs.get(a).getx() && projectiles.get(i).getx() + 5 > currentmobs.get(a).getx()){
-              if(currentmobs.get(a).getHP() == 1){
-                currentmobs.remove(a);
-              }else{
-                currentmobs.get(a).setHP(currentmobs.get(a).getHP());
-              }
-          }
-          PImage fire = loadImage("firer.png");
-            image(fire,projectiles.get(i).getx(),projectiles.get(i).gety());
-            projectiles.get(i).setx(projectiles.get(i).getx()-1);
+  for (int i = 0; i < projectiles.size (); i++) {
+    for (int a = 0; a < currentmobs.size () && projectiles.size() != 0; a++) {
+      if (projectiles.get(i).getside() == false) {
+        if (projectiles.get(i).getx() + shift + 5 >= currentmobs.get(a).getx() && projectiles.get(i).getx()+ shift - 5 <= currentmobs.get(a).getx()) {
+          currentmobs.remove(a);
+          projectiles.remove(i);
+        } else {
+          PImage fire = loadImage("firel.png");
+          image(fire, projectiles.get(i).getx(), projectiles.get(i).gety());
+          projectiles.get(i).setx(projectiles.get(i).getx()+1);
           if (projectiles.get(i).getx() > 700 || projectiles.get(i).getx() < 100) {
             projectiles.remove(i);
           }
         }
+      } else {
+        if (projectiles.get(i).getx() + shift - 5 <= currentmobs.get(a).getx() && projectiles.get(i).getx() + shift + 5 > currentmobs.get(a).getx()) {
+          currentmobs.remove(a);
+          projectiles.remove(i);
+        } else {
+          PImage fire = loadImage("firer.png");
+          image(fire, projectiles.get(i).getx(), projectiles.get(i).gety());
+          projectiles.get(i).setx(projectiles.get(i).getx()-1);
+          if (projectiles.get(i).getx() > 700 || projectiles.get(i).getx() < 100) {
+            projectiles.remove(i);
+          }
+        }
+      }
     }
   }
-  if(invuln == 0){
-    for (int a = 0; a < currentmobs.size(); a++){
-      if(currentmobs.get(a).getmovement() == false){
-        if(projectedx > currentmobs.get(a).getx() && projectedx - 40 < currentmobs.get(a).getx() && theplayer.gety() == currentmobs.get(a).gety()){
+  if (invuln == 0) {
+    for (int a = 0; a < currentmobs.size (); a++) {
+      if (currentmobs.get(a).getmovement() == false) {
+        if (projectedx > currentmobs.get(a).getx() && projectedx - 40 < currentmobs.get(a).getx() && theplayer.gety() == currentmobs.get(a).gety()) {
           theplayer.setHP(theplayer.getHP() - 1);
           invuln = 99;
         }
-      }else{
-        if(projectedx < currentmobs.get(a).getx() && projectedx + 40 > currentmobs.get(a).getx() && theplayer.gety() == currentmobs.get(a).gety()){
+      } else {
+        if (projectedx < currentmobs.get(a).getx() && projectedx + 40 > currentmobs.get(a).getx() && theplayer.gety() == currentmobs.get(a).gety()) {
           theplayer.setHP(theplayer.getHP() - 1);
           invuln = 99;
         }
       }
     }
-    if(finishedloading && boss != null){
-    if((theplayer.getx() > boss.getx() && theplayer.getx() - 40 < boss.getx() && theplayer.gety() == boss.gety() + 25) ||
-       (theplayer.getx() < boss.getx() && theplayer.getx() + 40 > boss.getx() && theplayer.gety() == boss.gety() + 25)){
-         theplayer.setHP(theplayer.getHP() - 1);
-         invuln = 99;
-         println("hit");
-       }
-    for(int a = 0; a < projectiles.size(); a++){
-      if(projectiles.get(a).getx() + 10 >=theplayer.getx() && projectiles.get(a).getx() - 10 <= theplayer.getx()){
-        println("projectilexy: " + projectiles.get(a).getx(), projectiles.get(a).gety());
+    if (finishedloading && boss != null) {
+      if ((theplayer.getx() > boss.getx() && theplayer.getx() - 40 < boss.getx() && theplayer.gety() == boss.gety() + 25) ||
+        (theplayer.getx() < boss.getx() && theplayer.getx() + 40 > boss.getx() && theplayer.gety() == boss.gety() + 25)) {
         theplayer.setHP(theplayer.getHP() - 1);
         invuln = 99;
+        println("hit");
+      }
+      for (int a = 0; a < projectiles.size (); a++) {
+        if (projectiles.get(a).getx() + 10 >=theplayer.getx() && projectiles.get(a).getx() - 10 <= theplayer.getx()) {
+          println("projectilexy: " + projectiles.get(a).getx(), projectiles.get(a).gety());
+          theplayer.setHP(theplayer.getHP() - 1);
+          invuln = 99;
+        }
       }
     }
-    }
-  }else{
+  } else {
     invuln--;
   }
 }
 void playermovements() {//movement of players
 
-  if (atking == true && onfloor) {
+    if (atking == true && onfloor) {
     if (intervalatk == 3) {
       if (atknum == 5) {
         atking = false;
@@ -322,7 +319,7 @@ void playermovements() {//movement of players
         spd--;
       }
     } else if (spd < 0 && playerinteractions(1) == "no terrain" && onfloor == false) {//jumping, going down
-    //println("down");
+      //println("down");
       theplayer.sety(theplayer.gety() - spd);
       if (movementamountvert - spd >= 25) {
         movementamountvert = movementamountvert - spd - 25;
@@ -400,11 +397,10 @@ void playermovements() {//movement of players
           shift = shift - 5;
         }
       }
-      if (lock == false || projectedx >= 7225){
-        
-          projectedx = projectedx - 5;
-          movementamounthorz = movementamounthorz - 5;
-        
+      if (lock == false || projectedx >= 7225) {
+
+        projectedx = projectedx - 5;
+        movementamounthorz = movementamounthorz - 5;
       }
     }
     if (keyRight && playerinteractions(3) == "no terrain") {//right
@@ -418,10 +414,9 @@ void playermovements() {//movement of players
       } else {
         shift = shift + 5;
       }
-      
-        projectedx = projectedx + 5;
-        movementamounthorz = movementamounthorz + 5;
 
+      projectedx = projectedx + 5;
+      movementamounthorz = movementamounthorz + 5;
     }
     if (keyRight && onfloor == false) {
       if (direction != "right") {
@@ -578,12 +573,13 @@ String playerinteractions(int a) {
 }
 
 void keyPressed() {
-  if(keyCode == 83 && onfloor){
-    if(direction == "right"){
-    projectiles.add(new Projectile(theplayer.getx(), theplayer.gety(), false));
-    }else{
+  if (keyCode == 83 && onfloor && bulletamount != 0) {
+    if (direction == "right") {
+      projectiles.add(new Projectile(theplayer.getx(), theplayer.gety(), false));
+    } else {
       projectiles.add(new Projectile(theplayer.getx(), theplayer.gety(), true));
     }
+    bulletamount--;
   }
   if (keyCode == 65 && onfloor) {
     atking = true;
@@ -624,53 +620,57 @@ void keyReleased() {
 }
 
 void loadplayer() {
-    fill(0);
+  fill(0);
   rect(10, 10, 35, theplayer.getHP() * 15 + 10);
   fill(#00ccff);
-  for(int a = 1; a <= theplayer.getHP(); a++){
+  for (int a = 1; a <= theplayer.getHP (); a++) {
     stroke(0);
     rect(15, a * 15, 25, 15);
   }
+  for(int a = 0; a < bulletamount; a++){
+    fill(#ffff00);
+    rect(45 + a * 20, 15, 20, 20);
+  } 
   imageMode(CORNER);
-  if(invuln % 3 == 0){
-  if (onfloor == true) {
-    if (direction == "left") {
-      if (atking == true) {
-        PImage hold = loadImage("swordleft" + atknum + ".png");
-        image(hold, theplayer.getx() - 26, theplayer.gety() - 10);
-      } else if (idleleft == false) {
-        PImage hold = loadImage("left" + leftnum + ".png");
-        image(hold, theplayer.getx(), theplayer.gety() - 10);
-      } else if (idleleft == true) {
-        PImage hold = loadImage("idleleft" + idlenum + ".png");
-        image(hold, theplayer.getx(), theplayer.gety() - 10);
-      }
-    }
-    if (direction == "right") {
-      if (atking == true) {
-        PImage hold = loadImage("swordright" + atknum + ".png");
-        image(hold, theplayer.getx(), theplayer.gety() - 10);
-      } else {
-        if (idleright == false) {
-          PImage hold = loadImage("right" + rightnum + ".png");
-          image(hold, theplayer.getx(), theplayer.gety()  - 10);
-        }
-        if (idleright == true) {
-          PImage hold = loadImage("idleright" + idlenum + ".png");
+  if (invuln % 3 == 0) {
+    if (onfloor == true) {
+      if (direction == "left") {
+        if (atking == true) {
+          PImage hold = loadImage("swordleft" + atknum + ".png");
+          image(hold, theplayer.getx() - 26, theplayer.gety() - 10);
+        } else if (idleleft == false) {
+          PImage hold = loadImage("left" + leftnum + ".png");
+          image(hold, theplayer.getx(), theplayer.gety() - 10);
+        } else if (idleleft == true) {
+          PImage hold = loadImage("idleleft" + idlenum + ".png");
           image(hold, theplayer.getx(), theplayer.gety() - 10);
         }
       }
+      if (direction == "right") {
+        if (atking == true) {
+          PImage hold = loadImage("swordright" + atknum + ".png");
+          image(hold, theplayer.getx(), theplayer.gety() - 10);
+        } else {
+          if (idleright == false) {
+            PImage hold = loadImage("right" + rightnum + ".png");
+            image(hold, theplayer.getx(), theplayer.gety()  - 10);
+          }
+          if (idleright == true) {
+            PImage hold = loadImage("idleright" + idlenum + ".png");
+            image(hold, theplayer.getx(), theplayer.gety() - 10);
+          }
+        }
+      }
+    } else {
+      if (direction == "right") {
+        PImage hold = loadImage("jumpright" + jumpnum + ".png");
+        image(hold, theplayer.getx(), theplayer.gety() - 10);
+      }
+      if (direction == "left") {
+        PImage hold = loadImage("jumpleft" + jumpnum + ".png");
+        image(hold, theplayer.getx(), theplayer.gety() - 10);
+      }
     }
-  } else {
-    if (direction == "right") {
-      PImage hold = loadImage("jumpright" + jumpnum + ".png");
-      image(hold, theplayer.getx(), theplayer.gety() - 10);
-    }
-    if (direction == "left") {
-      PImage hold = loadImage("jumpleft" + jumpnum + ".png");
-      image(hold, theplayer.getx(), theplayer.gety() - 10);
-    }
-  }
   }
   //fill(0);
   //rect(theplayer.getx(), theplayer.gety(), 25, 25);
@@ -687,7 +687,7 @@ void displayterrain() {
    if(endy.get(a).equals(starty.get(a))){
    rect(startx.get(a) - shift, starty.get(a), endx.get(a)-startx.get(a), 20);
    }else{
-     rect(startx.get(a) - shift, starty.get(a), 20, endy.get(a)-starty.get(a));
+   rect(startx.get(a) - shift, starty.get(a), 20, endy.get(a)-starty.get(a));
    }
    }
    */
@@ -697,10 +697,10 @@ void displayterrain() {
     for (int b = 0; b < themap[a].length; b++) {
       if (themap[a][b].equals("x")) {
         //rect(b * 25 - shift, a * 25, 25, 25);
-        if(b * 25 - shift < 850 && b * 25 - shift >= -50){
-          
-         image(holding, b * 25 - shift, a * 25);
-         }
+        if (b * 25 - shift < 850 && b * 25 - shift >= -50) {
+
+          image(holding, b * 25 - shift, a * 25);
+        }
       }
     }
   }
@@ -713,7 +713,7 @@ String terrainint(int a) {
   int holdx = projectedx;
   if (a == 0) {
     if (movementamountvert - spd <= 0) {
-     
+
       if (themap[onmapy - 1][onmapx].equals("x") || (projectedx % 25 != 0 && themap[onmapy -1][onmapx + 1].equals("x"))) {
         trigger = "terrain";
       }
@@ -773,14 +773,14 @@ void loadfinal() {
     lockmore = false;
     finishedloading = true;
   }
-  if(makingcell >= 25){
+  if (makingcell >= 25) {
     themap[makingcell / 25][7200 / 25] = "x";
     makingcell = makingcell - 25;
   }
 }
 
-void killedfirstboss(){
-  if(removeblocks >= 300){
+void killedfirstboss() {
+  if (removeblocks >= 300) {
     themap[removeblocks / 25][319] = "a";
     removeblocks = removeblocks - 25;
   }
@@ -789,76 +789,76 @@ void displayBoss() {
   fill(0);
   rect(750, 10, 35, boss.getHP() * 15 + 10);
   fill(#ff0000);
-  for(int a = 1; a <= boss.getHP(); a++){
+  for (int a = 1; a <= boss.getHP (); a++) {
     stroke(0);
     rect(755, a * 15, 25, 15);
   }
   int start = millis();
   //println(start-timer);
-  if (start-timer < 2000){
-    if (boss.getside()){
+  if (start-timer < 2000) {
+    if (boss.getside()) {
       PImage bossidle = loadImage("idler"+bossidleno+".png");
-      image(bossidle,boss.getx(),boss.gety());
-      if (start - bossidledelay > 20){
-      bossidleno++;
-      bossidledelay = millis();
+      image(bossidle, boss.getx(), boss.gety());
+      if (start - bossidledelay > 20) {
+        bossidleno++;
+        bossidledelay = millis();
       }
-      if (bossidleno == 8){
+      if (bossidleno == 8) {
         bossidleno = 0;
       }
-    }else{
+    } else {
       PImage bossidle = loadImage("idlel"+bossidleno+".png");
-      image(bossidle,boss.getx(),boss.gety());
-      if (start - bossidledelay > 20){
-      bossidleno++;
-      bossidledelay = millis();
+      image(bossidle, boss.getx(), boss.gety());
+      if (start - bossidledelay > 20) {
+        bossidleno++;
+        bossidledelay = millis();
       }
-      if (bossidleno == 8){
+      if (bossidleno == 8) {
         bossidleno = 0;
       }
     }
   }
-  if (start-timer > 2000 && start-timer < 3000){
+  if (start-timer > 2000 && start-timer < 3000) {
     PImage bosscharge = loadImage("charge"+bosschargeno+".png");
-    image(bosscharge,boss.getx(),boss.gety());
-    if (start - bosschargedelay > 50){
-    if (rewind){
-      if (bosschargeno == 0){
-        rewind = false;
+    image(bosscharge, boss.getx(), boss.gety());
+    if (start - bosschargedelay > 50) {
+      if (rewind) {
+        if (bosschargeno == 0) {
+          rewind = false;
+          bosschargeno++;
+        }
+        bosschargeno--;
+      } else {
+        if (bosschargeno == 3) {
+          rewind = true;
+          bosschargeno--;
+        }
         bosschargeno++;
       }
-      bosschargeno--;
-    }else{
-      if (bosschargeno == 3){
-        rewind = true;
-        bosschargeno--;
-      }
-      bosschargeno++;
-    }
-    bosschargedelay = millis();
+      bosschargedelay = millis();
     }
   }
   if ((start-timer) > 3000) {
     if (bossprojectile || projectiles.size() > 0) {
       PImage bossproj;
-      if (boss.getside()){
-      if (countdown > 1){
-        bossproj = loadImage("projectiler2.png");
-      }else if (countdown > 0){
-        bossproj = loadImage("projectiler8.png");
-      }else{
-        bossproj = loadImage("projectiler14.png");
+      if (boss.getside()) {
+        if (countdown > 1) {
+          bossproj = loadImage("projectiler2.png");
+        } else if (countdown > 0) {
+          bossproj = loadImage("projectiler8.png");
+        } else {
+          bossproj = loadImage("projectiler14.png");
+        }
+      } else {
+        if (countdown > 1) {
+          bossproj = loadImage("projectilel2.png");
+        } else if (countdown > 0) {
+          bossproj = loadImage("projectilel8.png");
+        } else {
+          bossproj = loadImage("projectilel14.png");
+        }
       }
-      }else{
-        if (countdown > 1){
-        bossproj = loadImage("projectilel2.png");
-      }else if (countdown > 0){
-        bossproj = loadImage("projectilel8.png");
-      }else{
-        bossproj = loadImage("projectilel14.png");
-      }
-      }
-      image(bossproj,boss.getx(),boss.gety());
+      image(bossproj, boss.getx(), boss.gety());
       if (countdown == 3) {
         projectiles.add(new Projectile(boss.getx(), boss.gety()+20, boss.getside()));
         timer2 = millis();
@@ -878,11 +878,11 @@ void displayBoss() {
           //ellipse(projectiles.get(i).getx(), projectiles.get(i).gety(), 30, 15);
           if (!projectiles.get(i).getside()) {
             PImage fire = loadImage("firel.png");
-            image(fire,projectiles.get(i).getx(),projectiles.get(i).gety());
+            image(fire, projectiles.get(i).getx(), projectiles.get(i).gety());
             projectiles.get(i).setx(projectiles.get(i).getx()+10);
           } else {
             PImage fire = loadImage("firer.png");
-            image(fire,projectiles.get(i).getx(),projectiles.get(i).gety());
+            image(fire, projectiles.get(i).getx(), projectiles.get(i).gety());
             projectiles.get(i).setx(projectiles.get(i).getx()-10);
           }
           if (projectiles.get(i).getx() > 700 || projectiles.get(i).getx() < 100) {
@@ -933,14 +933,14 @@ void displayBoss() {
         boss.setspd(boss.getspd() - 4);
       }
       boss.sety(boss.gety()-boss.getspd());
-    }else if (!bossprojectile){
+    } else if (!bossprojectile) {
       PImage dash;
-      if (boss.getside()){
-      dash = loadImage("dashright.png");
-      }else{
+      if (boss.getside()) {
+        dash = loadImage("dashright.png");
+      } else {
         dash = loadImage("dashleft.png");
       }
-      image(dash,boss.getx(),boss.gety());
+      image(dash, boss.getx(), boss.gety());
     }
     if (boss.getx() == 100 && boss.getside()) {
       boss.sety(350);
