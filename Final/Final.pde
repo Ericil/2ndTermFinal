@@ -55,8 +55,9 @@ int removeblocks;
 int bulletamount;
 int mobintervals;
 int lives;
+PImage thelives;
 void setup() {
-  lives = 2;
+  lives = 10;
   holding = loadImage("terrain.png");
   background = loadImage("backgroundtest.jpg");
   frameRate(60);
@@ -78,6 +79,7 @@ void setup() {
   mobl3 = loadImage("mobr3.png");
   firel = loadImage("firel.png");
   firer = loadImage("firer.png");
+  thelives = loadImage("idleright0.png");
 }
 
 void starting() {
@@ -768,7 +770,14 @@ void loadplayer() {
   for (int a = 0; a < bulletamount; a++) {
     fill(#ffff00);
     rect(45 + a * 20, 15, 20, 20);
-  } 
+  }
+  
+  for(int a = 0; a < lives; a++){
+    textSize(25);
+    fill(255);
+    text("Lives: ", 10, 440);
+    image(thelives, 10 + a * 40, 450);
+  }
   imageMode(CORNER);
   if (invuln % 3 == 0) {
     if (onfloor == true) {
