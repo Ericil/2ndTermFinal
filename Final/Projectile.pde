@@ -2,6 +2,12 @@ class Projectile{
  int x,y,spd;
  boolean side;
  
+ Projectile(int a, int b){
+   x =a;
+   y = b;
+   spd = 10;
+   side = true;
+ }
  Projectile(int a, int b, boolean right){
   x = a;
   y = b;
