@@ -46,10 +46,13 @@ boolean hit = false;
 int invuln = 0;
 PImage holding;
 PImage background;
+PImage mobr0, mobr1, mobr2, mobr3;
+PImage mobl0, mobl1, mobl2, mobl3;
 boolean killed = false;
 int autoplayer;
 int removeblocks;
 int bulletamount;
+int mobintervals;
 void setup() {
   holding = loadImage("terrain.png");
   background = loadImage("backgroundtest.jpg");
@@ -61,12 +64,23 @@ void setup() {
   starting();
   size(800, 500);
   killed = false;
+  mobr0 = loadImage("mobl0.png");
+  mobr1 = loadImage("mobl1.png");
+  mobr2 = loadImage("mobl2.png");
+  mobr3 = loadImage("mobl3.png");
+  
+  mobl0 = loadImage("mobr0.png");
+  mobl1 = loadImage("mobr1.png");
+  mobl2 = loadImage("mobr2.png");
+  mobl3 = loadImage("mobr3.png");
+  
 }
 
 void starting() {
   loadingbosscount = 0;
   makingcell = 375;
   currentmobs = new ArrayList<Mob>();
+  killed = true;
   if (killed == false) {
     test = createReader("map.txt");
   } else {
@@ -127,6 +141,7 @@ void starting() {
   autoplayer = 0;
   removeblocks = 375;
   bulletamount = 20;
+  mobintervals = 0;
 }
 
 void draw() {
@@ -540,12 +555,77 @@ void monstermovements() {// this is for one mob right now, later on,
 void loadmonsters() {
   for (int a = 0; a < currentmobs.size (); a++) {
     if (currentmobs.get(a).getx() - shift < 900 && currentmobs.get(a).getx() >= 0) {
+      PImage hold;
       fill(255, 0, 0);
       //println("mobs: " + currentmobs.get(a).getx(), currentmobs.get(a).gety());
-      rect(currentmobs.get(a).getx() - shift, currentmobs.get(a).gety(), 25, 25);
+      //rect(currentmobs.get(a).getx() - shift, currentmobs.get(a).gety(), 25, 25);
+      /*
+      if(currentmobs.get(a).getmovement() == false){
+        if(currentmobs.get(a).getpicnum() == 0){
+          image(mobr0, currentmobs.get(a).getx() - shift, currentmobs.get(a).gety());
+          currentmobs.get(a).setpicnum(currentmobs.get(a).getpicnum()+1);
+        }else if (currentmobs.get(a).getpicnum() == 1){
+          image(mobr1, currentmobs.get(a).getx() - shift, currentmobs.get(a).gety());
+          currentmobs.get(a).setpicnum(currentmobs.get(a).getpicnum()+1);
+          }
+        }else if (currentmobs.get(a).getpicnum() == 2){
+          image(mobr2, currentmobs.get(a).getx() - shift, currentmobs.get(a).gety());
+          currentmobs.get(a).setpicnum(currentmobs.get(a).getpicnum()+1);
+        }else if (currentmobs.get(a).getpicnum() == 3){
+          image(mobr3, currentmobs.get(a).getx() - shift, currentmobs.get(a).gety());
+          currentmobs.get(a).setpicnum(0);
+        }
+      }else{
+        if (currentmobs.get(a).getpicnum() == 0){
+          image(mobl0, currentmobs.get(a).getx() - shift, currentmobs.get(a).gety());
+          currentmobs.get(a).setpicnum(currentmobs.get(a).getpicnum()+1);
+        }else if (currentmobs.get(a).getpicnum() == 1){
+          image(mobl1, currentmobs.get(a).getx() - shift, currentmobs.get(a).gety());
+          currentmobs.get(a).setpicnum(currentmobs.get(a).getpicnum()+1);
+        }else if (currentmobs.get(a).getpicnum() == 2){
+          image(mobl2, currentmobs.get(a).getx() - shift, currentmobs.get(a).gety());
+          currentmobs.get(a).setpicnum(currentmobs.get(a).getpicnum()+1);
+        }else if (currentmobs.get(a).getpicnum() == 3){
+          image(mobl3, currentmobs.get(a).getx() - shift, currentmobs.get(a).gety());
+          currentmobs.get(a).setpicnum(0);
+        }
+      }
+      */
+      if(currentmobs.get(a).getmovement() == false){
+        if(currentmobs.get(a).getpicnum() == 0){
+          hold = mobr0;
+        }else if (currentmobs.get(a).getpicnum() == 1){
+          hold = mobr1;
+        }else if (currentmobs.get(a).getpicnum() == 2){
+          hold = mobr2;
+        }else{
+          hold = mobr3;
+        }
+      }else{
+        if (currentmobs.get(a).getpicnum() == 0){
+          hold = mobl0;
+        }else if (currentmobs.get(a).getpicnum() == 1){
+          hold = mobl1;
+        }else if (currentmobs.get(a).getpicnum() == 2){
+          hold = mobl2;
+        }else{
+          hold = mobl3;
+        }
+      }
+      image(hold, currentmobs.get(a).getx() - shift, currentmobs.get(a).gety() - 6);
+      if(mobintervals == 10){
+        if(currentmobs.get(a).getpicnum() != 3){
+          currentmobs.get(a).setpicnum(currentmobs.get(a).getpicnum()+1);
+        }else{
+          currentmobs.get(a).setpicnum(0);
+        }
+        mobintervals = 0;
+      }else{
+        mobintervals++;
+      }
     }
   }
-}
+  }
 /*
 boolean mobinteractions(int a, int b) {
  boolean trigger = true;

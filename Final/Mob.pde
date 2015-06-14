@@ -2,11 +2,14 @@ class Mob{
   int x;
   int y;
   int HP;
+  int picnum;
   boolean movement;
   Mob(int a, int b){
     x = a;
     y = b;
-    HP = 2;
+    HP = 1;
+    picnum = 0;
+    
   }
   int getHP(){
     return HP;
@@ -16,6 +19,9 @@ class Mob{
   }
   int gety(){
     return y;
+  }
+  int getpicnum(){
+    return picnum;
   }
   boolean getmovement(){
     return movement;
@@ -29,6 +35,9 @@ class Mob{
   }
   void sety(int a){
     y = a;
+  }
+  void setpicnum(int a ){
+    picnum = a;
   }
   void setmovement(boolean a){
     movement = a;
