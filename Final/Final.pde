@@ -1,5 +1,15 @@
 import java.io.*;
 import java.util.*;
+import ddf.minim.spi.*;
+import ddf.minim.signals.*;
+import ddf.minim.*;
+import ddf.minim.analysis.*;
+import ddf.minim.ugens.*;
+import ddf.minim.effects.*;
+
+AudioPlayer bgm, bossbgm, boss2bgm;
+Minim minim, minim2, minim3;
+
 boolean keyUp, keyDown, keyLeft, keyRight;//for movement of the player
 boolean atking;
 boolean canUp, canDown, canLeft, canRight;//if the player can move in that direction
@@ -35,6 +45,10 @@ int timer2 = 0;
 int lockon = 0;
 int delay = 0;
 int atktimer = 0;
+int bossprojimg = 0;
+int bossdiveimg = 0;
+int bossairimg = 0;
+int bossjumpimg = 0;
 boolean bossjump = false;
 boolean bossair = false;
 boolean bossprojectile = false;
@@ -67,6 +81,14 @@ void setup() {
   theplayer = new Player();
   starting();
   size(800, 500);
+  minim = new Minim(this);
+  minim2 = new Minim(this);
+  minim3 = new Minim(this);
+  bgm = minim.loadFile("bgm.mp3");
+  bossbgm = minim2.loadFile("bossbgm1.mp3");
+  boss2bgm = minim3.loadFile("bossbgm2.mp3");
+  bgm.play();
+  bossbgm = minim.loadFile("bossbgm"+stage+".mp3");
 }
 
 void starting() {
@@ -164,6 +186,11 @@ void draw() {
     monstermovements();
     if (finishedloading == true && boss != null) {
       displayBoss();
+      bgm.pause();
+      if (!bossbgm.isPlaying()) {
+        bossbgm.rewind();
+        bossbgm.play();
+      }
     } else if (boss != null) {
       timer = millis();
     } else {
@@ -174,6 +201,10 @@ void draw() {
     }
     loadmonsters();
     loadplayer();
+    if (!bgm.isPlaying()) {
+      bgm.rewind();
+      bgm.play();
+    }
   }
 }
 
@@ -1042,14 +1073,24 @@ void displayBoss() {
       }
     }
   } else if (stage == 2) {
-    if (start - timer < 2000){
-      //insert idle stuff here
+    if (start - timer < 2000) {
+      PImage bossidle = loadImage("b2idle.png");
+      image(bossidle, boss.getx(), boss.gety());
     }
-    if (start - timer > 2000 && start - timer < 3000){
-      //charge animation here
+    if (start - timer > 2000 && start - timer < 3000) {
+      PImage bosscharge = loadImage("charge"+bosschargeno+".png");
+      image(bosscharge, boss.getx(), boss.gety());
+      if (start - bosschargedelay > 50) {
+        bosschargeno++;
+        bosschargedelay = millis();
+      }
     }
     if (bossprojectile) {
       boss.setx(400);
+      PImage bossproj = loadImage("b2proj"+bossprojimg+".png");
+      if (bossprojimg < 2) {
+        bossprojimg++;
+      }
       if (lockon == 0) {
         lockon = theplayer.getx();
         delay = millis();
@@ -1060,7 +1101,8 @@ void displayBoss() {
         lockon = 0;
       }
       for (int i = 0; i<projectiles.size (); i++) {
-        ellipse(projectiles.get(i).getx(), projectiles.get(i).gety(), 30, 30);
+        PImage bossprome = loadImage("b2proj.png");
+        image(bossprome, projectiles.get(i).getx(), projectiles.get(i).gety());
         projectiles.get(i).sety(projectiles.get(i).gety() - 3);
         if (projectiles.get(i).gety() < 150) {
           projectiles.remove(i);
@@ -1071,76 +1113,106 @@ void displayBoss() {
         timer = millis();
         countdown = 3;
         boss.setx(700);
+        bossprojimg = 0;
       }
       counter++;
       counter2++;
       counter4++;
-    }else if (bossair){
+    } else if (bossair) {
       if (lockon == 0) {
-      lockon = theplayer.getx() + 100;
-      println("lockon:"+lockon);
-    } else {
-      if (boss.getx() > lockon) {
-        boss.setx(boss.getx()-10);
-        atktimer = millis();
-      } else if (boss.gety() > 150) {
-        boss.setx(boss.getx()-10);
-        boss.sety(boss.gety()-15);
+        lockon = theplayer.getx() + 100;
       } else {
+        if (boss.getx() > lockon) {
+          boss.setx(boss.getx()-10);
+          PImage bosschar = loadImage("b2charge13.png");
+          image(bosschar, boss.getx(), boss.gety());
+        } else if (boss.gety() > 150) {
+          PImage bossup = loadImage("b2air"+bossairimg+".png");
+          image(bossup, boss.getx(), boss.gety());
+          if (bossairimg < 5) {
+            bossairimg++;
+          }
+          boss.setx(boss.getx()-10);
+          boss.sety(boss.gety()-15);
+        } else {
+          lockon = 0;
+          bossairimg = 0;
+          boss.setx(700);
+          boss.sety(350);
+          timer = millis();
+        }
+      }
+      counter++;
+      counter3++;
+      counter4++;
+    } else if (bossdive) {
+      if (lockon == 0) {
+        lockon = theplayer.getx();
+        boss.setx(lockon);
+        boss.sety(150);
+      }
+      if (boss.gety() < 350 && !enddive) {
+        boss.sety(boss.gety()+10);
+        PImage bossdive1 = loadImage("b2dive"+(0+bossdiveimg)+".png");
+        image(bossdive1, boss.getx(), boss.gety());
+        if (bossdiveimg < 3) {
+          bossdiveimg++;
+        }
+      } else if (boss.gety() == 350) {
+        PImage divemid = loadImage("b2dive4.png");
+        image(divemid, boss.getx(), boss.gety());
+        bossdiveimg = 0;
+        enddive = true;
+        boss.sety(340);
+      } else if (enddive && boss.gety() > 150) {
+        boss.sety(boss.gety()-10);
+        PImage bossdive2 = loadImage("b2dive"+(5+bossdiveimg)+".png");
+        image(bossdive2, boss.getx, boss.gety());
+        if (bossdiveimg < 3) {
+          bossdiveimg++;
+        }
+      } else if (boss.gety() == 150 && enddive) {
         lockon = 0;
+        timer = millis();
         boss.setx(700);
         boss.sety(350);
-        timer = millis();
+        enddive = false;
+        bossdiveimg = 0;
       }
-    }
-      counter++;
-      counter3++;
-      counter4++;
-    } else if (bossdive){
-      if (lockon == 0) {
-      lockon = theplayer.getx();
-    boss.setx(lockon);
-    boss.sety(150);
-    }
-    if (boss.gety() < 350 && !enddive){
-      boss.sety(boss.gety()+10);
-    }else if (boss.gety() == 350){
-      enddive = true;
-      boss.sety(340);
-    }else if (enddive && boss.gety() > 150){
-      boss.sety(boss.gety()-10);
-    }else if (boss.gety() == 150 && enddive){
-      lockon = 0;
-      timer = millis();
-      boss.setx(700);
-      boss.sety(350);
-      enddive = false;
-    }
       counter++;
       counter2++;
       counter3++;
-    } else if (bossjump){
-      if (lockon == 0){
-     lockon = theplayer.getx();
-     }else{
-     if(boss.getx() > lockon){
-     boss.setx(boss.getx()-10);
-     atktimer = millis();
-     }else{
-     if(start - atktimer > 1000){
-     println(theplayer.getx());
-     lockon = 0;
-     boss.setx(700);
-     boss.sety(350);
-     timer = millis();
-     }
-     }
-     }
-     counter2++;
-     counter3++;
-     counter4++;
+    } else if (bossjump) { //not actually a jumping attack
+      if (lockon == 0) {
+        lockon = theplayer.getx();
+      } else {
+        if (boss.getx() > lockon) {
+          boss.setx(boss.getx()-10);
+          atktimer = millis();
+          PImage bossjump1 = loadImage("b2jump"+bossjumpimg+".png");
+          image(bossjump1, boss.getx(), boss.gety());
+          if (bossjumpimg < 2) {
+            bossjumpimg++;
+          }
+        } else {
+          PImage bossjump2 = loadImage("b2jump"+bossjumpimg+".png");
+          image(bossjump2, boss.getx(), boss.gety());
+          if (bossjumpimg < 9) {
+            bossjumpimg++;
+          }
+          if (start - atktimer > 1000) {
+            lockon = 0;
+            boss.setx(700);
+            boss.sety(350);
+            timer = millis();
+          }
+        }
+      }
+      counter2++;
+      counter3++;
+      counter4++;
     }
-    
+
     int action, action2, action3, action4;
     if (counter < 5 && counter2 < 7 && counter3 < 9) {
       action = chance.nextInt(5-counter);
@@ -1152,26 +1224,26 @@ void displayBoss() {
       action2 = 0;
       action3 = 0;
       action4 = 0;
-    } else if (counter3 > 9){
+    } else if (counter3 > 9) {
       action3 = 0;
       action = 4;
       action2 = 6;
       action4 = 3;
-    } else if (counter2 > 7){
+    } else if (counter2 > 7) {
       action2 = 0;
       action4 = 4;
       action = 6;
       action3 = 3;
-    }else {
+    } else {
       action = 0;
       action2 = 4;
       action3 = 5;
       action4 = 6;
     }
-    if (action4 == 0){
+    if (action4 == 0) {
       bossdive = true;
       counter4 = 0;
-    }else if (action3 == 0) {
+    } else if (action3 == 0) {
       bossprojectile = true;
       counter3 = 0;
     } else if (action2 == 0) {
@@ -1183,3 +1255,4 @@ void displayBoss() {
     }
   }
 }
+
