@@ -1754,14 +1754,16 @@ void displayBoss() {
     if (start - timer > 2000 && start - timer < 3000) {
       PImage bosscharge = loadImage("b2charge"+bosschargeno+".png");
       image(bosscharge, boss.getx(), boss.gety());
-      if (start - bosschargedelay > 50) {
+      if (start - bosschargedelay > 50 && bosschargeno < 13) {
         bosschargeno++;
         bosschargedelay = millis();
       }
     }
+    if (start - timer > 3000){
     if (bossprojectile) {
       boss.setx(400);
       PImage bossproj = loadImage("b2proj"+bossprojimg+".png");
+      image(bossproj,boss.getx(),boss.gety());
       if (bossprojimg < 2) {
         bossprojimg++;
       }
@@ -1788,6 +1790,8 @@ void displayBoss() {
         countdown = 3;
         boss.setx(700);
         bossprojimg = 0;
+        bosschargeno = 0;
+        bossprojectile = false;
       }
       counter++;
       counter2++;
@@ -1814,6 +1818,8 @@ void displayBoss() {
           boss.setx(700);
           boss.sety(350);
           timer = millis();
+          bosschargeno = 0;
+          bossair = false;
         }
       }
       counter++;
@@ -1852,6 +1858,8 @@ void displayBoss() {
         boss.sety(350);
         enddive = false;
         bossdiveimg = 0;
+        bosschargeno = 0;
+        bossdive = false;
       }
       counter++;
       counter2++;
@@ -1871,24 +1879,30 @@ void displayBoss() {
         } else {
           PImage bossjump2 = loadImage("b2jump"+bossjumpimg+".png");
           image(bossjump2, boss.getx(), boss.gety());
+          if (start - atktimer > 120){
           if (bossjumpimg < 9) {
             bossjumpimg++;
           }
-          if (start - atktimer > 1000) {
+          if (bossjumpimg == 9) {
             lockon = 0;
             boss.setx(700);
             boss.sety(350);
             timer = millis();
+            bosschargeno = 0;
+            bossjump = false;
+            bossjumpimg = 0;
           }
+          atktimer = millis();
         }
       }
       counter2++;
       counter3++;
       counter4++;
     }
-
+    }
+    if (!bossdive && !bossprojectile && !bossair && !bossjump){
     int action, action2, action3, action4;
-    if (counter < 5 && counter2 < 7 && counter3 < 9) {
+    /*if (counter < 5 && counter2 < 7 && counter3 < 9 && counter4 < 11) {
       action = chance.nextInt(5-counter);
       action2 = chance.nextInt(7-counter2);
       action3 = chance.nextInt(9-counter3);
@@ -1914,19 +1928,32 @@ void displayBoss() {
       action3 = 5;
       action4 = 6;
     }
-    if (action4 == 0) {
-      bossdive = true;
-      counter4 = 0;
-    } else if (action3 == 0) {
-      bossprojectile = true;
-      counter3 = 0;
+    
+    if (action == 0) {
+      bossjump = true;
+      counter = 0;
     } else if (action2 == 0) {
       bossair = true;
       counter2 = 0;
-    } else if (action == 0) {
+    } else if (action3 == 0) {
+      bossprojectile = true;
+      counter3 = 0;
+    } else if (action4 == 0) {
+      bossdive = true;
+      counter4 = 0;
+    }*/
+    int decide = chance.nextInt(10);
+    if (decide == 9){
+      bossdive = true;
+    }else if(decide > 6){
+      bossprojectile = true;
+    }else if(decide > 3){
+      bossair = true;
+    }else{
       bossjump = true;
-      counter = 0;
     }
+  }
+  }
   }
 }
 
