@@ -217,6 +217,10 @@ void draw() {
         if (theplayer.getx() == width - 25 && stage == 1) {
           stage = 2;
           starting();
+          bossbgm.pause();
+          bossbgm.rewind();
+          bgm.rewind();
+          bgm.play();
         } else if (theplayer.getx() == width - 25 && stage == 2) {
           youwin = true;
         }
