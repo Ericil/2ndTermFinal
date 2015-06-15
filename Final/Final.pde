@@ -125,7 +125,7 @@ void starting() {
   currentmobs = new ArrayList<Mob>();
   if (stage == 1) {
     test = createReader("map.txt");
-  } else {
+  } else if (stage == 2){
     test = createReader("map2.txt");
   }
   String ugh = null;
@@ -191,7 +191,7 @@ void draw() {
       image(background, 0, -400);
       fill(0);
       if (theplayer.gety() - spd > 450 || theplayer.getHP() == 0) {
-        if (theplayer.getHP() >= 1) {
+        if (lives >= 1) {
           starting();
         }
         lives--;
@@ -215,8 +215,8 @@ void draw() {
       } else if (finishedloading == true && boss == null) {
         killedfirstboss();
         if (theplayer.getx() == width - 25 && stage == 1) {
-          starting();
           stage = 2;
+          starting();
         } else if (theplayer.getx() == width - 25 && stage == 2) {
           youwin = true;
         }

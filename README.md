@@ -1,6 +1,37 @@
 2nd Term Final Project    
 Group Name: Megaman CS    
 
+6/14/15    
+Updates:    
+- added animations for mob    
+- added terrain to map2    
+- lowered mob HP to 1    
+- added music    
+- added animation for 2nd boss    
+- added start, victory, and game over screen    
+
+Bugfixes:    
+- fixed bullets so that their movement is not relying on the number of mobs(don’t as why it was like that)    
+- fixed music bugging out and switching for one to the other non-stop(causing a lot of lag)    
+- fixed terrain so they were actually able to be jumped onto    
+- fixed boss bullets so that they would to into account ycor(didn’t do this before cause the bullets were all on 1 ycor)    
+
+Need to do(but can’t):    
+- parallax background    
+
+6/13/15    
+Updates:    
+- expanded first map(2x), added 2nd map    
+- added mobs, added transition to 2nd map after killing first boss    
+- made bullets for the player    
+- made bullets damage enemies and bosses    
+- added wonky boss jump    
+
+Need to do:    
+- parallax background maybe???    
+- music    
+- polishing    
+
 6/11/15    
 Updates:    
 - boss has HP    
