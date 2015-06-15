@@ -1,6 +1,14 @@
 2nd Term Final Project    
 Group Name: Megaman CS    
 
+6/15/15    
+Updates:    
+- Done!    
+
+To Play: Open the Final folder, then open Final.pde    
+
+
+
 6/14/15    
 Updates:    
 - added animations for mob    
@@ -15,9 +23,16 @@ Bugfixes:
 - fixed music bugging out and switching for one to the other non-stop(causing a lot of lag)    
 - fixed terrain so they were actually able to be jumped onto    
 - fixed boss bullets so that they would to into account ycor(didn’t do this before cause the bullets were all on 1 ycor)    
+- fixed player glitching through maps diagonally    
+-  fixed sound not switching and changing correctly when player dies, spawns boss, kills boss, changes level or wins    
 
 Need to do(but can’t):    
 - parallax background    
+
+Rare bugs:    
+- random glitching of player through a block setting player 2 block lower than player should be, cannot reproduce consistently and cannot figure out why    
+- bosses(and very occasionally mobs) running through bullets and not getting hit    
+- hitboxes of player, mob, boss not interacting correctly (not damaging the player) cannot replicate    
 
 6/13/15    
 Updates:    
