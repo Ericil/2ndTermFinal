@@ -8,7 +8,7 @@ class Boss{
   y = 350;
   spd = 0;
   side = true;
-  HP = 10;
+  HP = 15;
  }
 
  int getHP(){

@@ -118,12 +118,11 @@ void setup() {
 }
 
 void starting() {
-
+  boss = null;
   projectiles = new ArrayList<Projectile>();
   loadingbosscount = 0;
   makingcell = 375;
   currentmobs = new ArrayList<Mob>();
-  stage = 2;
   if (stage == 1) {
     test = createReader("map.txt");
   } else {
@@ -187,7 +186,7 @@ void starting() {
 }
 
 void draw() {
-  if (startend == true && lives != 0) {
+  if (startend == true && lives != 0 && youwin == false) {
     if (lives != 0) {
       image(background, 0, -400);
       fill(0);
@@ -218,9 +217,7 @@ void draw() {
         if (theplayer.getx() == width - 25 && stage == 1) {
           starting();
           stage = 2;
-        }else if (theplayer.getx() == width - 25 && stage == 2){
-          PImage victory = loadImage("Toon_megaman_congratulations_resized.jpg");
-          image(victory, 0, 0);
+        } else if (theplayer.getx() == width - 25 && stage == 2) {
           youwin = true;
         }
       }
@@ -235,11 +232,18 @@ void draw() {
   } else if (startend == false) {
     loadstarting();
   } else if (lives == 0 && startend == true) {
-      PImage failure = loadImage("megamangameover_resized.jpg");
-      image(failure, 0, 0);
-      fill(#3366CC);
-      text("Click to restart", 300, 400);
-    }
+    PImage failure = loadImage("megamangameover_resized.jpg");
+    image(failure, 0, 0);
+    fill(#3366CC);
+    text("Click to restart", 300, 400);
+    bossbgm.pause();
+    bossbgm.rewind();
+  } else if (theplayer.getx() == width - 25 && stage == 2 && youwin == true) {
+    PImage victory = loadImage("Toon_megaman_congratulations_resized.jpg");
+    image(victory, 0, 0);
+    bossbgm.pause();
+    bossbgm.rewind();
+  }
 }
 
 void loadstarting() {
@@ -280,6 +284,7 @@ void loadstarting() {
     text("Health is the blue squares in the top left corner", 200, 400);
     text("Click to begin", 310, 450);
   } else if (startingstage == 2) {
+    bgm.rewind();
     bgm.play();
     starting();
     lives = 10;
@@ -298,15 +303,10 @@ void mouseClicked() {
   }
 }
 void combat() {
-  //println("playery: " + theplayer.gety());
-  //println("invuln: " + invuln);
-  //println("HP :" + theplayer.getHP());
   if (atking == true) {
     if (direction == "right") {
-      //println("atking right");
       for (int a = 0; a < currentmobs.size (); a++) {
         if (projectedx < currentmobs.get(a).getx() && projectedx + 50 > currentmobs.get(a).getx() && theplayer.gety() == currentmobs.get(a).gety() && hit == false) {
-          //println("HP: " + currentmobs.get(a).getHP());
           if (currentmobs.get(a).getHP() == 1) {
             currentmobs.remove(a);
           } else {
@@ -329,7 +329,6 @@ void combat() {
     } else {
       for (int a = 0; a < currentmobs.size (); a++) {
         if (projectedx > currentmobs.get(a).getx() && projectedx - 50 < currentmobs.get(a).getx() && theplayer.gety() == currentmobs.get(a).gety() && hit == false) {
-          //println("HP : " + currentmobs.get(a).getHP());
           if (currentmobs.get(a).getHP() == 1) {
             currentmobs.remove(a);
           } else {
@@ -353,21 +352,17 @@ void combat() {
   }
   for (int i = 0; i < projectiles.size (); i++) {
     for (int a = 0; a < currentmobs.size () && projectiles.size() != 0; a++) {
-      //println("mobsy: " + currentmobs.get(a).gety());
-      //println("projectiley: " + projectiles.get(i).gety());
       if (projectiles.get(i).getside() == false) {
         if (projectiles.get(i).getx() + shift + 10 >= currentmobs.get(a).getx() && projectiles.get(i).getx()+ shift - 10 <= currentmobs.get(a).getx()
           && projectiles.get(i).gety() == currentmobs.get(a).gety()) {
           currentmobs.remove(a);
           projectiles.remove(i);
-          println("hit1");
         }
       } else {
         if (projectiles.get(i).getx() + shift - 10 <= currentmobs.get(a).getx() && projectiles.get(i).getx() + shift + 10 > currentmobs.get(a).getx()
           && projectiles.get(i).gety() == currentmobs.get(a).gety()) {
           currentmobs.remove(a);
           projectiles.remove(i);
-          println("hit2");
         }
       }
     }
@@ -382,7 +377,6 @@ void combat() {
             boss.setHP(boss.getHP() - 1);
           }
           projectiles.remove(i);
-          println("bosshit");
         }
       } else {
         if (projectiles.get(i).getx() - 5 <= boss.getx() && projectiles.get(i).getx() + 5 > boss.getx()
@@ -394,7 +388,6 @@ void combat() {
             boss.setHP(boss.getHP() - 1);
           }
           projectiles.remove(i);
-          println("bosshit2");
         }
       }
     }
@@ -406,7 +399,6 @@ void combat() {
         projectiles.get(i).setx(projectiles.get(i).getx()+1);
         if (projectiles.get(i).getx() > 790 || projectiles.get(i).getx() < 10) {
           projectiles.remove(i);
-          println("remove1");
         }
       } else {
         {
@@ -415,7 +407,6 @@ void combat() {
           projectiles.get(i).setx(projectiles.get(i).getx()-1);
           if (projectiles.get(i).getx() > 790 || projectiles.get(i).getx() < 10) {
             projectiles.remove(i);
-            println("remove1");
           }
         }
       }
@@ -440,11 +431,10 @@ void combat() {
         (theplayer.getx() < boss.getx() && theplayer.getx() + 40 > boss.getx() && theplayer.gety() == boss.gety() + 25)) {
         theplayer.setHP(theplayer.getHP() - 1);
         invuln = 99;
-        println("hit");
       }
       for (int a = 0; a < bossprojectiles.size (); a++) {
-        if (bossprojectiles.get(a).getx() + 5 >=theplayer.getx() && bossprojectiles.get(a).getx() - 5 <= theplayer.getx()) {
-          //println("projectilexy: " + bossprojectiles.get(a).getx(), bossprojectiles.get(a).gety());
+        if (bossprojectiles.get(a).getx() + 5 >=theplayer.getx() && bossprojectiles.get(a).getx() - 5 <= theplayer.getx()
+          && bossprojectiles.get(a).gety() + 5 >= theplayer.getx() && bossprojectiles.get(a).gety() - 5 <= theplayer.gety()) {
           theplayer.setHP(theplayer.getHP() - 1);
           invuln = 99;
           bossprojectiles.remove(a);
@@ -490,7 +480,6 @@ void playermovements() {//movement of players
         spd--;
       }
     } else if (spd < 0 && playerinteractions(1) == "no terrain" && onfloor == false) {//jumping, going down
-      //println("down");
       theplayer.sety(theplayer.gety() - spd);
       if (movementamountvert - spd >= 25) {
         movementamountvert = movementamountvert - spd - 25;
@@ -560,11 +549,9 @@ void playermovements() {//movement of players
     }
     if (keyLeft && playerinteractions(2) == "no terrain") {//left
       if (projectedx < 400 || projectedx > 7225) {
-        //println("trigger");
         theplayer.setx(theplayer.getx() - 5);
       } else {
         if (lock == false) {
-          //println("trigger2");
           shift = shift - 5;
         }
       }
@@ -734,41 +721,25 @@ boolean mobinteractions(int a, int b) {
 String playerinteractions(int a) {
   String trigger = "no terrain";
   if (a == 0) {//up
-    for (int b = 0; b < currentmobs.size (); b++) {//mobs above
-      if (dist(theplayer.getx(), theplayer.gety(), currentmobs.get(b).getx(), currentmobs.get(b).gety()) <= 25 && currentmobs.get(b).gety() < theplayer.gety()) {
-        trigger = "terrain";
-      }
-    }
+
     if (terrainint(0) == "terrain") {
       trigger = "terrain";
     }
   }
   if (a == 1) {//down
-    for (int b = 0; b < currentmobs.size (); b++) {//mobs below
-      if (dist(theplayer.getx(), theplayer.gety(), currentmobs.get(b).getx(), currentmobs.get(b).gety()) <= 25 && currentmobs.get(b).gety() > theplayer.gety()) {
-        trigger = "terrain";
-      }
-    }
+
     if (terrainint(1) == "terrain") {
       trigger = "terrain";
     }
   }
   if (a == 2) {//left
-    for (int b = 0; b < currentmobs.size (); b++) {//mobs to the left
-      if (dist(theplayer.getx(), theplayer.gety(), currentmobs.get(b).getx(), currentmobs.get(b).gety()) <= 25 && currentmobs.get(b).getx() < theplayer.getx()) {
-        trigger = "terrain";
-      }
-    }
+
     if (terrainint(2) == "terrain") {
       trigger = "terrain";
     }
   }
   if (a == 3) {//right
-    for (int b = 0; b < currentmobs.size (); b++) {//mobs to the right
-      if (dist(theplayer.getx(), theplayer.gety(), currentmobs.get(b).getx(), currentmobs.get(b).gety()) <= 25 && currentmobs.get(b).getx() > theplayer.getx()) {
-        trigger = "terrain";
-      }
-    }
+
     if (terrainint(3) == "terrain") {
       trigger = "terrain";
     }
@@ -943,7 +914,6 @@ String terrainint(int a) {
     if (movementamounthorz == 0) {
       if (themap[onmapy][onmapx - 1].equals("x")) {
         trigger = "terrain";
-        //println("collisonleft");
         movementamounthorz = 0;
       } else {
         movementamounthorz = 25;
@@ -957,7 +927,6 @@ String terrainint(int a) {
     if (movementamounthorz == 25) {
       if (themap[onmapy][onmapx + 2].equals("x")) {
         trigger = "terrain";
-        //println("collisonright");
         movementamounthorz = 25;
       } else {
         movementamounthorz = 0;
@@ -997,512 +966,6 @@ void killedfirstboss() {
     removeblocks = removeblocks - 25;
   }
 }
-/*
-void displayBoss() {
- fill(0);
- rect(750, 10, 35, boss.getHP() * 15 + 10);
- fill(#ff0000);
- for (int a = 1; a <= boss.getHP (); a++) {
- stroke(0);
- rect(755, a * 15, 25, 15);
- }
- int start = millis();
- //println(start-timer);
- if (stage == 1) {
- if (start-timer < 2000) {
- if (boss.getside()) {
- PImage bossidle = loadImage("idler"+bossidleno+".png");
- image(bossidle, boss.getx(), boss.gety());
- if (start - bossidledelay > 20) {
- bossidleno++;
- bossidledelay = millis();
- }
- if (bossidleno == 8) {
- bossidleno = 0;
- }
- } else {
- PImage bossidle = loadImage("idlel"+bossidleno+".png");
- image(bossidle, boss.getx(), boss.gety());
- if (start - bossidledelay > 20) {
- bossidleno++;
- bossidledelay = millis();
- }
- if (bossidleno == 8) {
- bossidleno = 0;
- }
- }
- }
- if (start-timer > 2000 && start-timer < 3000) {
- PImage bosscharge = loadImage("charge"+bosschargeno+".png");
- image(bosscharge, boss.getx(), boss.gety());
- if (start - bosschargedelay > 50) {
- if (rewind) {
- if (bosschargeno == 0) {
- rewind = false;
- bosschargeno++;
- }
- bosschargeno--;
- } else {
- if (bosschargeno == 3) {
- rewind = true;
- bosschargeno--;
- }
- bosschargeno++;
- }
- bosschargedelay = millis();
- }
- }
- if ((start-timer) > 3000) {
- if (bossprojectile || projectiles.size() > 0) {
- PImage bossproj;
- if (boss.getside()) {
- if (countdown > 1) {
- bossproj = loadImage("projectiler2.png");
- } else if (countdown > 0) {
- bossproj = loadImage("projectiler8.png");
- } else {
- bossproj = loadImage("projectiler14.png");
- }
- } else {
- if (countdown > 1) {
- bossproj = loadImage("projectilel2.png");
- } else if (countdown > 0) {
- bossproj = loadImage("projectilel8.png");
- } else {
- bossproj = loadImage("projectilel14.png");
- }
- }
- image(bossproj, boss.getx(), boss.gety());
- if (countdown == 3) {
- projectiles.add(new Projectile(boss.getx(), boss.gety()+20, boss.getside()));
- timer2 = millis();
- countdown--;
- } else if (countdown > 0 && start-timer2 > 1000) {
- projectiles.add(new Projectile(boss.getx(), boss.gety()+20, boss.getside()));
- timer2 = millis();
- countdown--;
- } else if (countdown == 0 && projectiles.size() == 0) {
- bossprojectile = false;
- countdown = 3;
- changeprojectile = false;
- timer = millis();
- }
- if (projectiles.size() > 0) {
- for (int i = 0; i<projectiles.size (); i++) {
- //ellipse(projectiles.get(i).getx(), projectiles.get(i).gety(), 30, 15);
- if (!projectiles.get(i).getside()) {
- PImage fire = loadImage("firel.png");
- image(fire, projectiles.get(i).getx(), projectiles.get(i).gety());
- projectiles.get(i).setx(projectiles.get(i).getx()+10);
- } else {
- PImage fire = loadImage("firer.png");
- image(fire, projectiles.get(i).getx(), projectiles.get(i).gety());
- projectiles.get(i).setx(projectiles.get(i).getx()-10);
- }
- if (projectiles.get(i).getx() > 700 || projectiles.get(i).getx() < 100) {
- projectiles.remove(i);
- }
- }
- }
- } else if (boss.getx() == 700 || boss.getx() == 100) {
- int action, action2, action3;
- if (counter < 5 && counter2 < 7) {
- action = chance.nextInt(5-counter);
- action2 = chance.nextInt(7-counter2);
- action3 = chance.nextInt(9-counter3);
- } else if (counter < 9) {
- action = 0;
- action2 = 0;
- action3 = chance.nextInt(9-counter3);
- } else {
- action3 = 0;
- action = 4;
- action2 = 6;
- }
- if (action3 == 0) {
- bossprojectile = true;
- counter3 = 0;
- } else if (action2 == 0) {
- bossair = true;
- counter2 = 0;
- } else if (action == 0) {
- bossjump = true;
- counter = 0;
- }
- }
- if (!bossprojectile) {
- if (boss.getside()) {
- boss.setx(boss.getx()-10);
- } else {
- boss.setx(boss.getx()+10);
- }
- }
- if (bossair) {
- boss.sety(300);
- }
- if (bossjump) {
- if (boss.gety() == 350) {
- boss.setspd(40);
- } else {
- boss.setspd(boss.getspd() - 4);
- }
- 
- PImage jumping;
- if (boss.getside()) {
- if (boss.getspd() == 40) {
- jumping = loadImage("jumpr.png");
- } else if (boss.getspd() < 40 && boss.getspd() >= 32) {
- jumping = loadImage("jumpr0.png");
- } else if (boss.getspd() < 32 && boss.getspd() >= 24) {
- jumping = loadImage("jumpr1.png");
- } else if (boss.getspd() < 24 && boss.getspd() >= 16) {
- jumping = loadImage("jumpr2.png");
- } else if (boss.getspd() < 16 && boss.getspd() >= 8) {
- jumping = loadImage("jumpr3.png");
- } else if (boss.getspd() < 8 && boss.getspd() >= 0) {
- jumping = loadImage("jumpr4.png");
- } else if (boss.getspd() < 0 && boss.getspd() >= -8) {
- jumping = loadImage("jumpr5.png");
- } else if (boss.getspd() < -8 && boss.getspd() >= -16) {
- jumping = loadImage("jumpr6.png");
- } else if (boss.getspd() < -16 && boss.getspd() >= -24) {
- jumping = loadImage("jumpr7.png");
- } else if (boss.getspd() < -24 && boss.getspd() >= -32) {
- jumping = loadImage("jumpr8.png");
- } else if (boss.getspd() < -32 && boss.getspd() > -40) {
- jumping = loadImage("jumpr9.png");
- } else {
- jumping = loadImage("jumpr10.png");
- }
- <<<<<<< HEAD
- if (projectiles.get(i).getx() > 790 || projectiles.get(i).getx() < 10) {
- projectiles.remove(i);
- =======
- } else {
- if (boss.getspd() == 40) {
- jumping = loadImage("jumpl.png");
- } else if (boss.getspd() < 40 && boss.getspd() >= 32) {
- jumping = loadImage("jumpl0.png");
- } else if (boss.getspd() < 32 && boss.getspd() >= 24) {
- jumping = loadImage("jumpl1.png");
- } else if (boss.getspd() < 24 && boss.getspd() >= 16) {
- jumping = loadImage("jumpl2.png");
- } else if (boss.getspd() < 16 && boss.getspd() >= 8) {
- jumping = loadImage("jumpl3.png");
- } else if (boss.getspd() < 8 && boss.getspd() >= 0) {
- jumping = loadImage("jumpl4.png");
- } else if (boss.getspd() < 0 && boss.getspd() >= -8) {
- jumping = loadImage("jumpl5.png");
- } else if (boss.getspd() < -8 && boss.getspd() >= -16) {
- jumping = loadImage("jumpl6.png");
- } else if (boss.getspd() < -16 && boss.getspd() >= -24) {
- jumping = loadImage("jumpl7.png");
- } else if (boss.getspd() < -24 && boss.getspd() >= -32) {
- jumping = loadImage("jumpl8.png");
- } else if (boss.getspd() < -32 && boss.getspd() > -40) {
- jumping = loadImage("jumpl9.png");
- } else {
- jumping = loadImage("jumpl10.png");
- >>>>>>> origin/Boss2
- }
- }
- image(jumping, boss.getx(), boss.gety());
- 
- boss.sety(boss.gety()-boss.getspd());
- } else if (!bossprojectile) {
- PImage dash;
- if (boss.getside()) {
- dash = loadImage("dashright.png");
- } else {
- dash = loadImage("dashleft.png");
- }
- image(dash, boss.getx(), boss.gety());
- }
- if (boss.getx() == 100 && boss.getside()) {
- boss.sety(350);
- boss.switchside();
- timer = millis();
- counter++;
- counter2++;
- counter3++;
- bossair = false;
- bossjump = false;
- bossprojectile = false;
- boss.setspd(0);
- bossidleno = 0;
- bosschargeno = 0;
- } else if (boss.getx() == 700 && !boss.getside()) {
- boss.sety(350);
- boss.switchside();
- timer = millis();
- counter++;
- counter2++;
- counter3++;
- bossair = false;
- bossjump = false;
- bossprojectile = false;
- boss.setspd(0);
- bossidleno = 0;
- bosschargeno = 0;
- }
- }
- } else if (stage == 2) {
- if (start - timer < 2000) {
- PImage bossidle = loadImage("b2idle.png");
- image(bossidle, boss.getx(), boss.gety());
- }
- if (start - timer > 2000 && start - timer < 3000) {
- PImage bosscharge = loadImage("charge"+bosschargeno+".png");
- image(bosscharge, boss.getx(), boss.gety());
- if (start - bosschargedelay > 50) {
- bosschargeno++;
- bosschargedelay = millis();
- }
- }
- <<<<<<< HEAD
- if (bossjump) {
- if (boss.gety() == 350) {
- boss.setspd(40);
- } else {
- boss.setspd(boss.getspd() - 4);
- }
- 
- PImage jumping;
- if (boss.getside()) {
- if (boss.getspd() == 40) {
- jumping = loadImage("jumpr.png");
- } else if (boss.getspd() < 40 && boss.getspd() >= 32) {
- jumping = loadImage("jumpr0.png");
- } else if (boss.getspd() < 32 && boss.getspd() >= 24) {
- jumping = loadImage("jumpr1.png");
- } else if (boss.getspd() < 24 && boss.getspd() >= 16) {
- jumping = loadImage("jumpr2.png");
- } else if (boss.getspd() < 16 && boss.getspd() >= 8) {
- jumping = loadImage("jumpr3.png");
- } else if (boss.getspd() < 8 && boss.getspd() >= 0) {
- jumping = loadImage("jumpr4.png");
- } else if (boss.getspd() < 0 && boss.getspd() >= -8) {
- jumping = loadImage("jumpr5.png");
- } else if (boss.getspd() < -8 && boss.getspd() >= -16) {
- jumping = loadImage("jumpr6.png");
- } else if (boss.getspd() < -16 && boss.getspd() >= -24) {
- jumping = loadImage("jumpr7.png");
- } else if (boss.getspd() < -24 && boss.getspd() >= -32) {
- jumping = loadImage("jumpr8.png");
- } else if (boss.getspd() < -32 && boss.getspd() > -40) {
- jumping = loadImage("jumpr9.png");
- } else {
- jumping = loadImage("jumpr10.png");
- }
- } else {
- if (boss.getspd() == 40) {
- jumping = loadImage("jumpl.png");
- } else if (boss.getspd() < 40 && boss.getspd() >= 32) {
- jumping = loadImage("jumpl0.png");
- } else if (boss.getspd() < 32 && boss.getspd() >= 24) {
- jumping = loadImage("jumpl1.png");
- } else if (boss.getspd() < 24 && boss.getspd() >= 16) {
- jumping = loadImage("jumpl2.png");
- } else if (boss.getspd() < 16 && boss.getspd() >= 8) {
- jumping = loadImage("jumpl3.png");
- } else if (boss.getspd() < 8 && boss.getspd() >= 0) {
- jumping = loadImage("jumpl4.png");
- } else if (boss.getspd() < 0 && boss.getspd() >= -8) {
- jumping = loadImage("jumpl5.png");
- } else if (boss.getspd() < -8 && boss.getspd() >= -16) {
- jumping = loadImage("jumpl6.png");
- } else if (boss.getspd() < -16 && boss.getspd() >= -24) {
- jumping = loadImage("jumpl7.png");
- } else if (boss.getspd() < -24 && boss.getspd() >= -32) {
- jumping = loadImage("jumpl8.png");
- } else if (boss.getspd() < -32 && boss.getspd() > -40) {
- jumping = loadImage("jumpl9.png");
- } else {
- jumping = loadImage("jumpl10.png");
- }
- }
- image(jumping, boss.getx(), boss.gety());
- 
- boss.sety(boss.gety()-boss.getspd());
- } else if (!bossprojectile) {
- PImage dash;
- if (boss.getside()) {
- dash = loadImage("dashright.png");
- } else {
- dash = loadImage("dashleft.png");
- =======
- if (bossprojectile) {
- boss.setx(400);
- PImage bossproj = loadImage("b2proj"+bossprojimg+".png");
- if (bossprojimg < 2) {
- bossprojimg++;
- }
- if (lockon == 0) {
- lockon = theplayer.getx();
- delay = millis();
- }
- if (countdown >= 1 && start-delay > 700) {
- projectiles.add(new Projectile(lockon, 320));
- countdown--;
- lockon = 0;
- }
- for (int i = 0; i<projectiles.size (); i++) {
- PImage bossprome = loadImage("b2proj.png");
- image(bossprome, projectiles.get(i).getx(), projectiles.get(i).gety());
- projectiles.get(i).sety(projectiles.get(i).gety() - 3);
- if (projectiles.get(i).gety() < 150) {
- projectiles.remove(i);
- }
- }
- if (countdown == 0 && (projectiles.size() == 0)) {
- lockon = 0;
- timer = millis();
- countdown = 3;
- boss.setx(700);
- bossprojimg = 0;
- >>>>>>> origin/Boss2
- }
- counter++;
- counter2++;
- counter4++;
- } else if (bossair) {
- if (lockon == 0) {
- lockon = theplayer.getx() + 100;
- } else {
- if (boss.getx() > lockon) {
- boss.setx(boss.getx()-10);
- PImage bosschar = loadImage("b2charge13.png");
- image(bosschar, boss.getx(), boss.gety());
- } else if (boss.gety() > 150) {
- PImage bossup = loadImage("b2air"+bossairimg+".png");
- image(bossup, boss.getx(), boss.gety());
- if (bossairimg < 5) {
- bossairimg++;
- }
- boss.setx(boss.getx()-10);
- boss.sety(boss.gety()-15);
- } else {
- lockon = 0;
- bossairimg = 0;
- boss.setx(700);
- boss.sety(350);
- timer = millis();
- }
- }
- counter++;
- counter3++;
- counter4++;
- } else if (bossdive) {
- if (lockon == 0) {
- lockon = theplayer.getx();
- boss.setx(lockon);
- boss.sety(150);
- }
- if (boss.gety() < 350 && !enddive) {
- boss.sety(boss.gety()+10);
- PImage bossdive1 = loadImage("b2dive"+(0+bossdiveimg)+".png");
- image(bossdive1, boss.getx(), boss.gety());
- if (bossdiveimg < 3) {
- bossdiveimg++;
- }
- } else if (boss.gety() == 350) {
- PImage divemid = loadImage("b2dive4.png");
- image(divemid, boss.getx(), boss.gety());
- bossdiveimg = 0;
- enddive = true;
- boss.sety(340);
- } else if (enddive && boss.gety() > 150) {
- boss.sety(boss.gety()-10);
- PImage bossdive2 = loadImage("b2dive"+(5+bossdiveimg)+".png");
- image(bossdive2, boss.getx, boss.gety());
- if (bossdiveimg < 3) {
- bossdiveimg++;
- }
- } else if (boss.gety() == 150 && enddive) {
- lockon = 0;
- timer = millis();
- boss.setx(700);
- boss.sety(350);
- enddive = false;
- bossdiveimg = 0;
- }
- counter++;
- counter2++;
- counter3++;
- } else if (bossjump) { //not actually a jumping attack
- if (lockon == 0) {
- lockon = theplayer.getx();
- } else {
- if (boss.getx() > lockon) {
- boss.setx(boss.getx()-10);
- atktimer = millis();
- PImage bossjump1 = loadImage("b2jump"+bossjumpimg+".png");
- image(bossjump1, boss.getx(), boss.gety());
- if (bossjumpimg < 2) {
- bossjumpimg++;
- }
- } else {
- PImage bossjump2 = loadImage("b2jump"+bossjumpimg+".png");
- image(bossjump2, boss.getx(), boss.gety());
- if (bossjumpimg < 9) {
- bossjumpimg++;
- }
- if (start - atktimer > 1000) {
- lockon = 0;
- boss.setx(700);
- boss.sety(350);
- timer = millis();
- }
- }
- }
- counter2++;
- counter3++;
- counter4++;
- }
- 
- int action, action2, action3, action4;
- if (counter < 5 && counter2 < 7 && counter3 < 9) {
- action = chance.nextInt(5-counter);
- action2 = chance.nextInt(7-counter2);
- action3 = chance.nextInt(9-counter3);
- action4 = chance.nextInt(11-counter4);
- } else if (counter4 > 11) {
- action = 0;
- action2 = 0;
- action3 = 0;
- action4 = 0;
- } else if (counter3 > 9) {
- action3 = 0;
- action = 4;
- action2 = 6;
- action4 = 3;
- } else if (counter2 > 7) {
- action2 = 0;
- action4 = 4;
- action = 6;
- action3 = 3;
- } else {
- action = 0;
- action2 = 4;
- action3 = 5;
- action4 = 6;
- }
- if (action4 == 0) {
- bossdive = true;
- counter4 = 0;
- } else if (action3 == 0) {
- bossprojectile = true;
- counter3 = 0;
- } else if (action2 == 0) {
- bossair = true;
- counter2 = 0;
- } else if (action == 0) {
- bossjump = true;
- counter = 0;
- }
- }
- }
- */
 void displayBoss() {
   fill(0);
   rect(750, 10, 35, boss.getHP() * 15 + 10);
@@ -1512,7 +975,6 @@ void displayBoss() {
     rect(755, a * 15, 25, 15);
   }
   int start = millis();
-  //println(start-timer);
   if (stage == 1) {
 
     if (start-timer < 2000) {
@@ -1610,7 +1072,7 @@ void displayBoss() {
             }
           }
         }
-      } else if (boss.getx() == 700 || boss.getx() == 100) {
+      } else if (boss.getx() == 790 || boss.getx() == 10) {
         int action, action2, action3;
         if (counter < 5 && counter2 < 7) {
           action = chance.nextInt(5-counter);
@@ -1759,201 +1221,201 @@ void displayBoss() {
         bosschargedelay = millis();
       }
     }
-    if (start - timer > 3000){
-    if (bossprojectile) {
-      boss.setx(400);
-      PImage bossproj = loadImage("b2proj"+bossprojimg+".png");
-      image(bossproj,boss.getx(),boss.gety());
-      if (bossprojimg < 2) {
-        bossprojimg++;
-      }
-      if (lockon == 0) {
-        lockon = theplayer.getx();
-        delay = millis();
-      }
-      if (countdown >= 1 && start-delay > 700) {
-        bossprojectiles.add(new Projectile(lockon, 320));
-        countdown--;
-        lockon = 0;
-      }
-      for (int i = 0; i<bossprojectiles.size (); i++) {
-        PImage bossprome = loadImage("b2proj.png");
-        image(bossprome, bossprojectiles.get(i).getx(), bossprojectiles.get(i).gety());
-        bossprojectiles.get(i).sety(bossprojectiles.get(i).gety() - 3);
-        if (bossprojectiles.get(i).gety() < 150) {
-          bossprojectiles.remove(i);
+    if (start - timer > 3000) {
+      if (bossprojectile) {
+        boss.setx(400);
+        PImage bossproj = loadImage("b2proj"+bossprojimg+".png");
+        image(bossproj, boss.getx(), boss.gety());
+        if (bossprojimg < 2) {
+          bossprojimg++;
         }
-      }
-      if (countdown == 0 && (bossprojectiles.size() == 0)) {
-        lockon = 0;
-        timer = millis();
-        countdown = 3;
-        boss.setx(700);
-        bossprojimg = 0;
-        bosschargeno = 0;
-        bossprojectile = false;
-      }
-      counter++;
-      counter2++;
-      counter4++;
-    } else if (bossair) {
-      if (lockon == 0) {
-        lockon = theplayer.getx() + 100;
-      } else {
-        if (boss.getx() > lockon) {
-          boss.setx(boss.getx()-10);
-          PImage bosschar = loadImage("b2charge13.png");
-          image(bosschar, boss.getx(), boss.gety());
-        } else if (boss.gety() > 150) {
-          PImage bossup = loadImage("b2air"+bossairimg+".png");
-          image(bossup, boss.getx(), boss.gety());
-          if (bossairimg < 5) {
-            bossairimg++;
-          }
-          boss.setx(boss.getx()-10);
-          boss.sety(boss.gety()-15);
-        } else {
+        if (lockon == 0) {
+          lockon = theplayer.getx();
+          delay = millis();
+        }
+        if (countdown >= 1 && start-delay > 700) {
+          bossprojectiles.add(new Projectile(lockon, 320));
+          countdown--;
           lockon = 0;
-          bossairimg = 0;
-          boss.setx(700);
-          boss.sety(350);
+        }
+        for (int i = 0; i<bossprojectiles.size (); i++) {
+          PImage bossprome = loadImage("b2proj.png");
+          image(bossprome, bossprojectiles.get(i).getx(), bossprojectiles.get(i).gety());
+          bossprojectiles.get(i).sety(bossprojectiles.get(i).gety() - 3);
+          if (bossprojectiles.get(i).gety() < 150) {
+            bossprojectiles.remove(i);
+          }
+        }
+        if (countdown == 0 && (bossprojectiles.size() == 0)) {
+          lockon = 0;
           timer = millis();
+          countdown = 3;
+          boss.setx(700);
+          bossprojimg = 0;
           bosschargeno = 0;
-          bossair = false;
+          bossprojectile = false;
         }
-      }
-      counter++;
-      counter3++;
-      counter4++;
-    } else if (bossdive) {
-      if (lockon == 0) {
-        lockon = theplayer.getx();
-        boss.setx(lockon);
-        boss.sety(150);
-      }
-      if (boss.gety() < 350 && !enddive) {
-        boss.sety(boss.gety()+10);
-        PImage bossdive1 = loadImage("b2dive"+(0+bossdiveimg)+".png");
-        image(bossdive1, boss.getx(), boss.gety());
-        if (bossdiveimg < 3) {
-          bossdiveimg++;
-        }
-      } else if (boss.gety() == 350) {
-        PImage divemid = loadImage("b2dive4.png");
-        image(divemid, boss.getx(), boss.gety());
-        bossdiveimg = 0;
-        enddive = true;
-        boss.sety(340);
-      } else if (enddive && boss.gety() > 150) {
-        boss.sety(boss.gety()-10);
-        PImage bossdive2 = loadImage("b2dive"+(5+bossdiveimg)+".png");
-        image(bossdive2, boss.getx(), boss.gety());
-        if (bossdiveimg < 3) {
-          bossdiveimg++;
-        }
-      } else if (boss.gety() == 150 && enddive) {
-        lockon = 0;
-        timer = millis();
-        boss.setx(700);
-        boss.sety(350);
-        enddive = false;
-        bossdiveimg = 0;
-        bosschargeno = 0;
-        bossdive = false;
-      }
-      counter++;
-      counter2++;
-      counter3++;
-    } else if (bossjump) { //not actually a jumping attack
-      if (lockon == 0) {
-        lockon = theplayer.getx();
-      } else {
-        if (boss.getx() > lockon) {
-          boss.setx(boss.getx()-10);
-          atktimer = millis();
-          PImage bossjump1 = loadImage("b2jump"+bossjumpimg+".png");
-          image(bossjump1, boss.getx(), boss.gety());
-          if (bossjumpimg < 2) {
-            bossjumpimg++;
-          }
+        counter++;
+        counter2++;
+        counter4++;
+      } else if (bossair) {
+        if (lockon == 0) {
+          lockon = theplayer.getx() + 100;
         } else {
-          PImage bossjump2 = loadImage("b2jump"+bossjumpimg+".png");
-          image(bossjump2, boss.getx(), boss.gety());
-          if (start - atktimer > 120){
-          if (bossjumpimg < 9) {
-            bossjumpimg++;
-          }
-          if (bossjumpimg == 9) {
+          if (boss.getx() > lockon) {
+            boss.setx(boss.getx()-10);
+            PImage bosschar = loadImage("b2charge13.png");
+            image(bosschar, boss.getx(), boss.gety());
+          } else if (boss.gety() > 150) {
+            PImage bossup = loadImage("b2air"+bossairimg+".png");
+            image(bossup, boss.getx(), boss.gety());
+            if (bossairimg < 5) {
+              bossairimg++;
+            }
+            boss.setx(boss.getx()-10);
+            boss.sety(boss.gety()-15);
+          } else {
             lockon = 0;
+            bossairimg = 0;
             boss.setx(700);
             boss.sety(350);
             timer = millis();
             bosschargeno = 0;
-            bossjump = false;
-            bossjumpimg = 0;
+            bossair = false;
           }
-          atktimer = millis();
+        }
+        counter++;
+        counter3++;
+        counter4++;
+      } else if (bossdive) {
+        if (lockon == 0) {
+          lockon = theplayer.getx();
+          boss.setx(lockon);
+          boss.sety(150);
+        }
+        if (boss.gety() < 350 && !enddive) {
+          boss.sety(boss.gety()+10);
+          PImage bossdive1 = loadImage("b2dive"+(0+bossdiveimg)+".png");
+          image(bossdive1, boss.getx(), boss.gety());
+          if (bossdiveimg < 3) {
+            bossdiveimg++;
+          }
+        } else if (boss.gety() == 350) {
+          PImage divemid = loadImage("b2dive4.png");
+          image(divemid, boss.getx(), boss.gety());
+          bossdiveimg = 0;
+          enddive = true;
+          boss.sety(340);
+        } else if (enddive && boss.gety() > 150) {
+          boss.sety(boss.gety()-10);
+          PImage bossdive2 = loadImage("b2dive"+(5+bossdiveimg)+".png");
+          image(bossdive2, boss.getx(), boss.gety());
+          if (bossdiveimg < 3) {
+            bossdiveimg++;
+          }
+        } else if (boss.gety() == 150 && enddive) {
+          lockon = 0;
+          timer = millis();
+          boss.setx(700);
+          boss.sety(350);
+          enddive = false;
+          bossdiveimg = 0;
+          bosschargeno = 0;
+          bossdive = false;
+        }
+        counter++;
+        counter2++;
+        counter3++;
+      } else if (bossjump) { //not actually a jumping attack
+        if (lockon == 0) {
+          lockon = theplayer.getx();
+        } else {
+          if (boss.getx() > lockon) {
+            boss.setx(boss.getx()-10);
+            atktimer = millis();
+            PImage bossjump1 = loadImage("b2jump"+bossjumpimg+".png");
+            image(bossjump1, boss.getx(), boss.gety());
+            if (bossjumpimg < 2) {
+              bossjumpimg++;
+            }
+          } else {
+            PImage bossjump2 = loadImage("b2jump"+bossjumpimg+".png");
+            image(bossjump2, boss.getx(), boss.gety());
+            if (start - atktimer > 120) {
+              if (bossjumpimg < 9) {
+                bossjumpimg++;
+              }
+              if (bossjumpimg == 9) {
+                lockon = 0;
+                boss.setx(700);
+                boss.sety(350);
+                timer = millis();
+                bosschargeno = 0;
+                bossjump = false;
+                bossjumpimg = 0;
+              }
+              atktimer = millis();
+            }
+          }
+          counter2++;
+          counter3++;
+          counter4++;
         }
       }
-      counter2++;
-      counter3++;
-      counter4++;
+      if (!bossdive && !bossprojectile && !bossair && !bossjump) {
+        int action, action2, action3, action4;
+        /*if (counter < 5 && counter2 < 7 && counter3 < 9 && counter4 < 11) {
+         action = chance.nextInt(5-counter);
+         action2 = chance.nextInt(7-counter2);
+         action3 = chance.nextInt(9-counter3);
+         action4 = chance.nextInt(11-counter4);
+         } else if (counter4 > 11) {
+         action = 0;
+         action2 = 0;
+         action3 = 0;
+         action4 = 0;
+         } else if (counter3 > 9) {
+         action3 = 0;
+         action = 4;
+         action2 = 6;
+         action4 = 3;
+         } else if (counter2 > 7) {
+         action2 = 0;
+         action4 = 4;
+         action = 6;
+         action3 = 3;
+         } else {
+         action = 0;
+         action2 = 4;
+         action3 = 5;
+         action4 = 6;
+         }
+         
+         if (action == 0) {
+         bossjump = true;
+         counter = 0;
+         } else if (action2 == 0) {
+         bossair = true;
+         counter2 = 0;
+         } else if (action3 == 0) {
+         bossprojectile = true;
+         counter3 = 0;
+         } else if (action4 == 0) {
+         bossdive = true;
+         counter4 = 0;
+         }*/
+        int decide = chance.nextInt(10);
+        if (decide == 9) {
+          bossdive = true;
+        } else if (decide > 6) {
+          bossprojectile = true;
+        } else if (decide > 3) {
+          bossair = true;
+        } else {
+          bossjump = true;
+        }
+      }
     }
-    }
-    if (!bossdive && !bossprojectile && !bossair && !bossjump){
-    int action, action2, action3, action4;
-    /*if (counter < 5 && counter2 < 7 && counter3 < 9 && counter4 < 11) {
-      action = chance.nextInt(5-counter);
-      action2 = chance.nextInt(7-counter2);
-      action3 = chance.nextInt(9-counter3);
-      action4 = chance.nextInt(11-counter4);
-    } else if (counter4 > 11) {
-      action = 0;
-      action2 = 0;
-      action3 = 0;
-      action4 = 0;
-    } else if (counter3 > 9) {
-      action3 = 0;
-      action = 4;
-      action2 = 6;
-      action4 = 3;
-    } else if (counter2 > 7) {
-      action2 = 0;
-      action4 = 4;
-      action = 6;
-      action3 = 3;
-    } else {
-      action = 0;
-      action2 = 4;
-      action3 = 5;
-      action4 = 6;
-    }
-    
-    if (action == 0) {
-      bossjump = true;
-      counter = 0;
-    } else if (action2 == 0) {
-      bossair = true;
-      counter2 = 0;
-    } else if (action3 == 0) {
-      bossprojectile = true;
-      counter3 = 0;
-    } else if (action4 == 0) {
-      bossdive = true;
-      counter4 = 0;
-    }*/
-    int decide = chance.nextInt(10);
-    if (decide == 9){
-      bossdive = true;
-    }else if(decide > 6){
-      bossprojectile = true;
-    }else if(decide > 3){
-      bossair = true;
-    }else{
-      bossjump = true;
-    }
-  }
-  }
   }
 }
 
