@@ -79,7 +79,11 @@ int bulletamount;
 int mobintervals;
 int lives;
 PImage thelives;
+boolean startend = false;
+int startingstage = 0;
+boolean youwin = false;
 void setup() {
+  stage = 1;
   lives = 10;
   holding = loadImage("terrain.png");
   background = loadImage("backgroundtest.jpg");
@@ -103,26 +107,24 @@ void setup() {
   firel = loadImage("firel.png");
   firer = loadImage("firer.png");
   thelives = loadImage("idleright0.png");
-  
+
   minim = new Minim(this);
   minim2 = new Minim(this);
   minim3 = new Minim(this);
   bgm = minim.loadFile("bgm.mp3");
   bossbgm = minim2.loadFile("bossbgm1.mp3");
   boss2bgm = minim3.loadFile("bossbgm2.mp3");
-  bgm.play();
   bossbgm = minim.loadFile("bossbgm"+stage+".mp3");
-  
 }
 
 void starting() {
-  
+
   projectiles = new ArrayList<Projectile>();
   loadingbosscount = 0;
   makingcell = 375;
   currentmobs = new ArrayList<Mob>();
-  stage = 1;
-  if (killed == false) {
+  stage = 2;
+  if (stage == 1) {
     test = createReader("map.txt");
   } else {
     test = createReader("map2.txt");
@@ -180,79 +182,121 @@ void starting() {
   finishedloading = false;
   autoplayer = 0;
   removeblocks = 375;
-  bulletamount = 25;
+  bulletamount = 5;
   mobintervals = 0;
-
 }
 
 void draw() {
-  /*
-  if(currentmobs.size() != 0){
-    for(int a = 0; a < currentmobs.size() && currentmobs.size() != 0; a++){
-      currentmobs.remove(0);
-    }
-  }
-  */
-  //println("playerxy: " + projectedx, theplayer.gety());
-  /*
-  for(int a = 0; a < themap.length; a++){
-   for(int b = 0; b < themap[a].length; b++){
-   print(themap[a][b] + " ");
-   }
-   }
-   */
- 
-  //enemymovements();//movement of the enemies
-  if (lives != 0) {
-    println("lives: " + lives);
+  if (startend == true && lives != 0) {
+    if (lives != 0) {
       image(background, 0, -400);
+      fill(0);
+      if (theplayer.gety() - spd > 450 || theplayer.getHP() == 0) {
+        if (theplayer.getHP() >= 1) {
+          starting();
+        }
+        lives--;
+      }
+      if (lockmore == true) {
+        loadfinal();
+      }
+      displayterrain();
+      playermovements();//movement of the player
+      combat();
+      monstermovements();
+      if (finishedloading == true && boss != null) {
+        displayBoss();
+        bgm.pause();
+        if (!bossbgm.isPlaying()) {
+          bossbgm.rewind();
+          bossbgm.play();
+        }
+      } else if (boss != null) {
+        timer = millis();
+      } else if (finishedloading == true && boss == null) {
+        killedfirstboss();
+        if (theplayer.getx() == width - 25 && stage == 1) {
+          starting();
+          stage = 2;
+        }else if (theplayer.getx() == width - 25 && stage == 2){
+          PImage victory = loadImage("Toon_megaman_congratulations_resized.jpg");
+          image(victory, 0, 0);
+          youwin = true;
+        }
+      }
+      loadmonsters();
+      loadplayer();
+
+      if (!bgm.isPlaying() && boss == null) {
+        bgm.rewind();
+        bgm.play();
+      }
+    }
+  } else if (startend == false) {
+    loadstarting();
+  } else if (lives == 0 && startend == true) {
+      PImage failure = loadImage("megamangameover_resized.jpg");
+      image(failure, 0, 0);
+      fill(#3366CC);
+      text("Click to restart", 300, 400);
+    }
+}
+
+void loadstarting() {
+  background(0);
+  if (startingstage == 0) {
+    PImage hold = loadImage("megamanzxstart_resized.jpg");
+    image(hold, 0, 0);
+    fill(#323299);
+    textSize(32);
+    text("Click to start", 300, 350);
+  } else if (startingstage == 1) {
+    background(#00CCFF);
+    fill(#A9A9A9);
+    rect(100, 100, 30, 30);
+    rect(60, 140, 30, 30);
+    rect(140, 140, 30, 30);
+    rect(100, 220, 30, 30);
+    rect(100, 300, 30, 30);
+    fill(#BABABA);
+    rect(103, 104, 24, 24);
+    rect(64, 143, 24, 24);
+    rect(142, 143, 24, 24);
+    rect(103, 224, 24, 24);
+    rect(103, 304, 24, 24);
+    textSize(30);
     fill(0);
-    if (theplayer.gety() - spd > 450 || theplayer.getHP() == 0) {
-      if(theplayer.getHP() >= 1){
-      starting();
-      }
-      lives--;
-    }
-    if (lockmore == true) {
-      loadfinal();
-    }
-    displayterrain();
-    playermovements();//movement of the player
-    combat();
-    monstermovements();
-    if (finishedloading == true && boss != null) {
-      displayBoss();
-      bgm.pause();
-      if (!bossbgm.isPlaying()) {
-        bossbgm.rewind();
-        bossbgm.play();
-      }
-    } else if (boss != null) {
-      timer = millis();
-    } else if (finishedloading == true && boss == null){
-      killedfirstboss();
-      if (theplayer.getx() == width - 25) {
-        starting();
-        stage = 2;
-      }
-    }
-    loadmonsters();
-    loadplayer();
-    
-    if (!bgm.isPlaying() && boss == null) {
-      bgm.rewind();
-      bgm.play();
-    }
-  }else{
-    PFont font = loadFont("Silom-48.vlw");
-    background(0);
-    textFont(font);
-    textSize(100);
-    fill(255);
-    text("Game Over", 100, 250);
+    text("^", 106, 128);
+    text(">", 144, 164);
+    text("<", 66, 164);
+    textSize(20);
+    text("A", 106, 244);
+    text("S", 106, 324);
+    textSize(20);
+    text("Controls", 340, 50);
+    text("Use the Left and Right arrow keys to move\nUse the Up arrow key to jump", 200, 130);
+    text("Use the A key to attack, beware that when you attack,\nyou cannot move until you finish attacking", 200, 230);
+    text("Use the S key to shoot, you only have 5 bullets\na level though, so be careful when using them!\nBullets are the yellow squares in the top left corner", 200, 310);
+    text("Health is the blue squares in the top left corner", 200, 400);
+    text("Click to begin", 310, 450);
+  } else if (startingstage == 2) {
+    bgm.play();
+    starting();
+    lives = 10;
+    startend = true;
   }
 }
 
+void mouseClicked() {
+  if (startend == false) {
+    startingstage++;
+  }
+  if (lives == 0 && startend == true || youwin == true) {
+    startend = false;
+    startingstage = 0;
+    youwin = false;
+  }
+}
 void combat() {
   //println("playery: " + theplayer.gety());
   //println("invuln: " + invuln);
@@ -355,17 +399,17 @@ void combat() {
       }
     }
   }
-  for(int a = 0; a < 10; a++){
-  for (int i = 0; i < projectiles.size(); i++){
-     if(projectiles.get(i).getside() == false){
-       image(firel, projectiles.get(i).getx(), projectiles.get(i).gety());
-          projectiles.get(i).setx(projectiles.get(i).getx()+1);
-          if (projectiles.get(i).getx() > 790 || projectiles.get(i).getx() < 10) {
-            projectiles.remove(i);
-            println("remove1");
-          }
-        }else{
-          {
+  for (int a = 0; a < 10; a++) {
+    for (int i = 0; i < projectiles.size (); i++) {
+      if (projectiles.get(i).getside() == false) {
+        image(firel, projectiles.get(i).getx(), projectiles.get(i).gety());
+        projectiles.get(i).setx(projectiles.get(i).getx()+1);
+        if (projectiles.get(i).getx() > 790 || projectiles.get(i).getx() < 10) {
+          projectiles.remove(i);
+          println("remove1");
+        }
+      } else {
+        {
 
           image(firer, projectiles.get(i).getx(), projectiles.get(i).gety());
           projectiles.get(i).setx(projectiles.get(i).getx()-1);
@@ -374,8 +418,8 @@ void combat() {
             println("remove1");
           }
         }
-        }
-  }
+      }
+    }
   }
   if (invuln == 0) {
     for (int a = 0; a < currentmobs.size (); a++) {
@@ -625,7 +669,7 @@ void loadmonsters() {
     if (currentmobs.get(a).getx() - shift < 900 && currentmobs.get(a).getx() - shift >= 0) {
       PImage hold;
       fill(255, 0, 0);
-      
+
       if (currentmobs.get(a).getmovement() == false) {
         if (currentmobs.get(a).getpicnum() == 0) {
           hold = mobr0;
@@ -791,8 +835,8 @@ void loadplayer() {
     fill(#ffff00);
     rect(45 + a * 20, 15, 20, 20);
   }
-  
-  for(int a = 0; a < lives; a++){
+
+  for (int a = 0; a < lives; a++) {
     textSize(25);
     fill(255);
     text("Lives: ", 10, 440);
@@ -955,510 +999,510 @@ void killedfirstboss() {
 }
 /*
 void displayBoss() {
-  fill(0);
-  rect(750, 10, 35, boss.getHP() * 15 + 10);
-  fill(#ff0000);
-  for (int a = 1; a <= boss.getHP (); a++) {
-    stroke(0);
-    rect(755, a * 15, 25, 15);
-  }
-  int start = millis();
-  //println(start-timer);
-  if (stage == 1) {
-    if (start-timer < 2000) {
-      if (boss.getside()) {
-        PImage bossidle = loadImage("idler"+bossidleno+".png");
-        image(bossidle, boss.getx(), boss.gety());
-        if (start - bossidledelay > 20) {
-          bossidleno++;
-          bossidledelay = millis();
-        }
-        if (bossidleno == 8) {
-          bossidleno = 0;
-        }
-      } else {
-        PImage bossidle = loadImage("idlel"+bossidleno+".png");
-        image(bossidle, boss.getx(), boss.gety());
-        if (start - bossidledelay > 20) {
-          bossidleno++;
-          bossidledelay = millis();
-        }
-        if (bossidleno == 8) {
-          bossidleno = 0;
-        }
-      }
-    }
-    if (start-timer > 2000 && start-timer < 3000) {
-      PImage bosscharge = loadImage("charge"+bosschargeno+".png");
-      image(bosscharge, boss.getx(), boss.gety());
-      if (start - bosschargedelay > 50) {
-        if (rewind) {
-          if (bosschargeno == 0) {
-            rewind = false;
-            bosschargeno++;
-          }
-          bosschargeno--;
-        } else {
-          if (bosschargeno == 3) {
-            rewind = true;
-            bosschargeno--;
-          }
-          bosschargeno++;
-        }
-        bosschargedelay = millis();
-      }
-    }
-    if ((start-timer) > 3000) {
-      if (bossprojectile || projectiles.size() > 0) {
-        PImage bossproj;
-        if (boss.getside()) {
-          if (countdown > 1) {
-            bossproj = loadImage("projectiler2.png");
-          } else if (countdown > 0) {
-            bossproj = loadImage("projectiler8.png");
-          } else {
-            bossproj = loadImage("projectiler14.png");
-          }
-        } else {
-          if (countdown > 1) {
-            bossproj = loadImage("projectilel2.png");
-          } else if (countdown > 0) {
-            bossproj = loadImage("projectilel8.png");
-          } else {
-            bossproj = loadImage("projectilel14.png");
-          }
-        }
-        image(bossproj, boss.getx(), boss.gety());
-        if (countdown == 3) {
-          projectiles.add(new Projectile(boss.getx(), boss.gety()+20, boss.getside()));
-          timer2 = millis();
-          countdown--;
-        } else if (countdown > 0 && start-timer2 > 1000) {
-          projectiles.add(new Projectile(boss.getx(), boss.gety()+20, boss.getside()));
-          timer2 = millis();
-          countdown--;
-        } else if (countdown == 0 && projectiles.size() == 0) {
-          bossprojectile = false;
-          countdown = 3;
-          changeprojectile = false;
-          timer = millis();
-        }
-        if (projectiles.size() > 0) {
-          for (int i = 0; i<projectiles.size (); i++) {
-            //ellipse(projectiles.get(i).getx(), projectiles.get(i).gety(), 30, 15);
-            if (!projectiles.get(i).getside()) {
-              PImage fire = loadImage("firel.png");
-              image(fire, projectiles.get(i).getx(), projectiles.get(i).gety());
-              projectiles.get(i).setx(projectiles.get(i).getx()+10);
-            } else {
-              PImage fire = loadImage("firer.png");
-              image(fire, projectiles.get(i).getx(), projectiles.get(i).gety());
-              projectiles.get(i).setx(projectiles.get(i).getx()-10);
-            }
-            if (projectiles.get(i).getx() > 700 || projectiles.get(i).getx() < 100) {
-              projectiles.remove(i);
-            }
-          }
-        }
-      } else if (boss.getx() == 700 || boss.getx() == 100) {
-        int action, action2, action3;
-        if (counter < 5 && counter2 < 7) {
-          action = chance.nextInt(5-counter);
-          action2 = chance.nextInt(7-counter2);
-          action3 = chance.nextInt(9-counter3);
-        } else if (counter < 9) {
-          action = 0;
-          action2 = 0;
-          action3 = chance.nextInt(9-counter3);
-        } else {
-          action3 = 0;
-          action = 4;
-          action2 = 6;
-        }
-        if (action3 == 0) {
-          bossprojectile = true;
-          counter3 = 0;
-        } else if (action2 == 0) {
-          bossair = true;
-          counter2 = 0;
-        } else if (action == 0) {
-          bossjump = true;
-          counter = 0;
-        }
-      }
-      if (!bossprojectile) {
-        if (boss.getside()) {
-          boss.setx(boss.getx()-10);
-        } else {
-          boss.setx(boss.getx()+10);
-        }
-      }
-      if (bossair) {
-        boss.sety(300);
-      }
-      if (bossjump) {
-        if (boss.gety() == 350) {
-          boss.setspd(40);
-        } else {
-          boss.setspd(boss.getspd() - 4);
-        }
-
-        PImage jumping;
-        if (boss.getside()) {
-          if (boss.getspd() == 40) {
-            jumping = loadImage("jumpr.png");
-          } else if (boss.getspd() < 40 && boss.getspd() >= 32) {
-            jumping = loadImage("jumpr0.png");
-          } else if (boss.getspd() < 32 && boss.getspd() >= 24) {
-            jumping = loadImage("jumpr1.png");
-          } else if (boss.getspd() < 24 && boss.getspd() >= 16) {
-            jumping = loadImage("jumpr2.png");
-          } else if (boss.getspd() < 16 && boss.getspd() >= 8) {
-            jumping = loadImage("jumpr3.png");
-          } else if (boss.getspd() < 8 && boss.getspd() >= 0) {
-            jumping = loadImage("jumpr4.png");
-          } else if (boss.getspd() < 0 && boss.getspd() >= -8) {
-            jumping = loadImage("jumpr5.png");
-          } else if (boss.getspd() < -8 && boss.getspd() >= -16) {
-            jumping = loadImage("jumpr6.png");
-          } else if (boss.getspd() < -16 && boss.getspd() >= -24) {
-            jumping = loadImage("jumpr7.png");
-          } else if (boss.getspd() < -24 && boss.getspd() >= -32) {
-            jumping = loadImage("jumpr8.png");
-          } else if (boss.getspd() < -32 && boss.getspd() > -40) {
-            jumping = loadImage("jumpr9.png");
-          } else {
-            jumping = loadImage("jumpr10.png");
-          }
-<<<<<<< HEAD
-          if (projectiles.get(i).getx() > 790 || projectiles.get(i).getx() < 10) {
-            projectiles.remove(i);
-=======
-        } else {
-          if (boss.getspd() == 40) {
-            jumping = loadImage("jumpl.png");
-          } else if (boss.getspd() < 40 && boss.getspd() >= 32) {
-            jumping = loadImage("jumpl0.png");
-          } else if (boss.getspd() < 32 && boss.getspd() >= 24) {
-            jumping = loadImage("jumpl1.png");
-          } else if (boss.getspd() < 24 && boss.getspd() >= 16) {
-            jumping = loadImage("jumpl2.png");
-          } else if (boss.getspd() < 16 && boss.getspd() >= 8) {
-            jumping = loadImage("jumpl3.png");
-          } else if (boss.getspd() < 8 && boss.getspd() >= 0) {
-            jumping = loadImage("jumpl4.png");
-          } else if (boss.getspd() < 0 && boss.getspd() >= -8) {
-            jumping = loadImage("jumpl5.png");
-          } else if (boss.getspd() < -8 && boss.getspd() >= -16) {
-            jumping = loadImage("jumpl6.png");
-          } else if (boss.getspd() < -16 && boss.getspd() >= -24) {
-            jumping = loadImage("jumpl7.png");
-          } else if (boss.getspd() < -24 && boss.getspd() >= -32) {
-            jumping = loadImage("jumpl8.png");
-          } else if (boss.getspd() < -32 && boss.getspd() > -40) {
-            jumping = loadImage("jumpl9.png");
-          } else {
-            jumping = loadImage("jumpl10.png");
->>>>>>> origin/Boss2
-          }
-        }
-        image(jumping, boss.getx(), boss.gety());
-
-        boss.sety(boss.gety()-boss.getspd());
-      } else if (!bossprojectile) {
-        PImage dash;
-        if (boss.getside()) {
-          dash = loadImage("dashright.png");
-        } else {
-          dash = loadImage("dashleft.png");
-        }
-        image(dash, boss.getx(), boss.gety());
-      }
-      if (boss.getx() == 100 && boss.getside()) {
-        boss.sety(350);
-        boss.switchside();
-        timer = millis();
-        counter++;
-        counter2++;
-        counter3++;
-        bossair = false;
-        bossjump = false;
-        bossprojectile = false;
-        boss.setspd(0);
-        bossidleno = 0;
-        bosschargeno = 0;
-      } else if (boss.getx() == 700 && !boss.getside()) {
-        boss.sety(350);
-        boss.switchside();
-        timer = millis();
-        counter++;
-        counter2++;
-        counter3++;
-        bossair = false;
-        bossjump = false;
-        bossprojectile = false;
-        boss.setspd(0);
-        bossidleno = 0;
-        bosschargeno = 0;
-      }
-    }
-  } else if (stage == 2) {
-    if (start - timer < 2000) {
-      PImage bossidle = loadImage("b2idle.png");
-      image(bossidle, boss.getx(), boss.gety());
-    }
-    if (start - timer > 2000 && start - timer < 3000) {
-      PImage bosscharge = loadImage("charge"+bosschargeno+".png");
-      image(bosscharge, boss.getx(), boss.gety());
-      if (start - bosschargedelay > 50) {
-        bosschargeno++;
-        bosschargedelay = millis();
-      }
-    }
-<<<<<<< HEAD
-    if (bossjump) {
-      if (boss.gety() == 350) {
-        boss.setspd(40);
-      } else {
-        boss.setspd(boss.getspd() - 4);
-      }
-
-      PImage jumping;
-      if (boss.getside()) {
-        if (boss.getspd() == 40) {
-          jumping = loadImage("jumpr.png");
-        } else if (boss.getspd() < 40 && boss.getspd() >= 32) {
-          jumping = loadImage("jumpr0.png");
-        } else if (boss.getspd() < 32 && boss.getspd() >= 24) {
-          jumping = loadImage("jumpr1.png");
-        } else if (boss.getspd() < 24 && boss.getspd() >= 16) {
-          jumping = loadImage("jumpr2.png");
-        } else if (boss.getspd() < 16 && boss.getspd() >= 8) {
-          jumping = loadImage("jumpr3.png");
-        } else if (boss.getspd() < 8 && boss.getspd() >= 0) {
-          jumping = loadImage("jumpr4.png");
-        } else if (boss.getspd() < 0 && boss.getspd() >= -8) {
-          jumping = loadImage("jumpr5.png");
-        } else if (boss.getspd() < -8 && boss.getspd() >= -16) {
-          jumping = loadImage("jumpr6.png");
-        } else if (boss.getspd() < -16 && boss.getspd() >= -24) {
-          jumping = loadImage("jumpr7.png");
-        } else if (boss.getspd() < -24 && boss.getspd() >= -32) {
-          jumping = loadImage("jumpr8.png");
-        } else if (boss.getspd() < -32 && boss.getspd() > -40) {
-          jumping = loadImage("jumpr9.png");
-        } else {
-          jumping = loadImage("jumpr10.png");
-        }
-      } else {
-        if (boss.getspd() == 40) {
-          jumping = loadImage("jumpl.png");
-        } else if (boss.getspd() < 40 && boss.getspd() >= 32) {
-          jumping = loadImage("jumpl0.png");
-        } else if (boss.getspd() < 32 && boss.getspd() >= 24) {
-          jumping = loadImage("jumpl1.png");
-        } else if (boss.getspd() < 24 && boss.getspd() >= 16) {
-          jumping = loadImage("jumpl2.png");
-        } else if (boss.getspd() < 16 && boss.getspd() >= 8) {
-          jumping = loadImage("jumpl3.png");
-        } else if (boss.getspd() < 8 && boss.getspd() >= 0) {
-          jumping = loadImage("jumpl4.png");
-        } else if (boss.getspd() < 0 && boss.getspd() >= -8) {
-          jumping = loadImage("jumpl5.png");
-        } else if (boss.getspd() < -8 && boss.getspd() >= -16) {
-          jumping = loadImage("jumpl6.png");
-        } else if (boss.getspd() < -16 && boss.getspd() >= -24) {
-          jumping = loadImage("jumpl7.png");
-        } else if (boss.getspd() < -24 && boss.getspd() >= -32) {
-          jumping = loadImage("jumpl8.png");
-        } else if (boss.getspd() < -32 && boss.getspd() > -40) {
-          jumping = loadImage("jumpl9.png");
-        } else {
-          jumping = loadImage("jumpl10.png");
-        }
-      }
-      image(jumping, boss.getx(), boss.gety());
-
-      boss.sety(boss.gety()-boss.getspd());
-    } else if (!bossprojectile) {
-      PImage dash;
-      if (boss.getside()) {
-        dash = loadImage("dashright.png");
-      } else {
-        dash = loadImage("dashleft.png");
-=======
-    if (bossprojectile) {
-      boss.setx(400);
-      PImage bossproj = loadImage("b2proj"+bossprojimg+".png");
-      if (bossprojimg < 2) {
-        bossprojimg++;
-      }
-      if (lockon == 0) {
-        lockon = theplayer.getx();
-        delay = millis();
-      }
-      if (countdown >= 1 && start-delay > 700) {
-        projectiles.add(new Projectile(lockon, 320));
-        countdown--;
-        lockon = 0;
-      }
-      for (int i = 0; i<projectiles.size (); i++) {
-        PImage bossprome = loadImage("b2proj.png");
-        image(bossprome, projectiles.get(i).getx(), projectiles.get(i).gety());
-        projectiles.get(i).sety(projectiles.get(i).gety() - 3);
-        if (projectiles.get(i).gety() < 150) {
-          projectiles.remove(i);
-        }
-      }
-      if (countdown == 0 && (projectiles.size() == 0)) {
-        lockon = 0;
-        timer = millis();
-        countdown = 3;
-        boss.setx(700);
-        bossprojimg = 0;
->>>>>>> origin/Boss2
-      }
-      counter++;
-      counter2++;
-      counter4++;
-    } else if (bossair) {
-      if (lockon == 0) {
-        lockon = theplayer.getx() + 100;
-      } else {
-        if (boss.getx() > lockon) {
-          boss.setx(boss.getx()-10);
-          PImage bosschar = loadImage("b2charge13.png");
-          image(bosschar, boss.getx(), boss.gety());
-        } else if (boss.gety() > 150) {
-          PImage bossup = loadImage("b2air"+bossairimg+".png");
-          image(bossup, boss.getx(), boss.gety());
-          if (bossairimg < 5) {
-            bossairimg++;
-          }
-          boss.setx(boss.getx()-10);
-          boss.sety(boss.gety()-15);
-        } else {
-          lockon = 0;
-          bossairimg = 0;
-          boss.setx(700);
-          boss.sety(350);
-          timer = millis();
-        }
-      }
-      counter++;
-      counter3++;
-      counter4++;
-    } else if (bossdive) {
-      if (lockon == 0) {
-        lockon = theplayer.getx();
-        boss.setx(lockon);
-        boss.sety(150);
-      }
-      if (boss.gety() < 350 && !enddive) {
-        boss.sety(boss.gety()+10);
-        PImage bossdive1 = loadImage("b2dive"+(0+bossdiveimg)+".png");
-        image(bossdive1, boss.getx(), boss.gety());
-        if (bossdiveimg < 3) {
-          bossdiveimg++;
-        }
-      } else if (boss.gety() == 350) {
-        PImage divemid = loadImage("b2dive4.png");
-        image(divemid, boss.getx(), boss.gety());
-        bossdiveimg = 0;
-        enddive = true;
-        boss.sety(340);
-      } else if (enddive && boss.gety() > 150) {
-        boss.sety(boss.gety()-10);
-        PImage bossdive2 = loadImage("b2dive"+(5+bossdiveimg)+".png");
-        image(bossdive2, boss.getx, boss.gety());
-        if (bossdiveimg < 3) {
-          bossdiveimg++;
-        }
-      } else if (boss.gety() == 150 && enddive) {
-        lockon = 0;
-        timer = millis();
-        boss.setx(700);
-        boss.sety(350);
-        enddive = false;
-        bossdiveimg = 0;
-      }
-      counter++;
-      counter2++;
-      counter3++;
-    } else if (bossjump) { //not actually a jumping attack
-      if (lockon == 0) {
-        lockon = theplayer.getx();
-      } else {
-        if (boss.getx() > lockon) {
-          boss.setx(boss.getx()-10);
-          atktimer = millis();
-          PImage bossjump1 = loadImage("b2jump"+bossjumpimg+".png");
-          image(bossjump1, boss.getx(), boss.gety());
-          if (bossjumpimg < 2) {
-            bossjumpimg++;
-          }
-        } else {
-          PImage bossjump2 = loadImage("b2jump"+bossjumpimg+".png");
-          image(bossjump2, boss.getx(), boss.gety());
-          if (bossjumpimg < 9) {
-            bossjumpimg++;
-          }
-          if (start - atktimer > 1000) {
-            lockon = 0;
-            boss.setx(700);
-            boss.sety(350);
-            timer = millis();
-          }
-        }
-      }
-      counter2++;
-      counter3++;
-      counter4++;
-    }
-
-    int action, action2, action3, action4;
-    if (counter < 5 && counter2 < 7 && counter3 < 9) {
-      action = chance.nextInt(5-counter);
-      action2 = chance.nextInt(7-counter2);
-      action3 = chance.nextInt(9-counter3);
-      action4 = chance.nextInt(11-counter4);
-    } else if (counter4 > 11) {
-      action = 0;
-      action2 = 0;
-      action3 = 0;
-      action4 = 0;
-    } else if (counter3 > 9) {
-      action3 = 0;
-      action = 4;
-      action2 = 6;
-      action4 = 3;
-    } else if (counter2 > 7) {
-      action2 = 0;
-      action4 = 4;
-      action = 6;
-      action3 = 3;
-    } else {
-      action = 0;
-      action2 = 4;
-      action3 = 5;
-      action4 = 6;
-    }
-    if (action4 == 0) {
-      bossdive = true;
-      counter4 = 0;
-    } else if (action3 == 0) {
-      bossprojectile = true;
-      counter3 = 0;
-    } else if (action2 == 0) {
-      bossair = true;
-      counter2 = 0;
-    } else if (action == 0) {
-      bossjump = true;
-      counter = 0;
-    }
-  }
-}
-*/
+ fill(0);
+ rect(750, 10, 35, boss.getHP() * 15 + 10);
+ fill(#ff0000);
+ for (int a = 1; a <= boss.getHP (); a++) {
+ stroke(0);
+ rect(755, a * 15, 25, 15);
+ }
+ int start = millis();
+ //println(start-timer);
+ if (stage == 1) {
+ if (start-timer < 2000) {
+ if (boss.getside()) {
+ PImage bossidle = loadImage("idler"+bossidleno+".png");
+ image(bossidle, boss.getx(), boss.gety());
+ if (start - bossidledelay > 20) {
+ bossidleno++;
+ bossidledelay = millis();
+ }
+ if (bossidleno == 8) {
+ bossidleno = 0;
+ }
+ } else {
+ PImage bossidle = loadImage("idlel"+bossidleno+".png");
+ image(bossidle, boss.getx(), boss.gety());
+ if (start - bossidledelay > 20) {
+ bossidleno++;
+ bossidledelay = millis();
+ }
+ if (bossidleno == 8) {
+ bossidleno = 0;
+ }
+ }
+ }
+ if (start-timer > 2000 && start-timer < 3000) {
+ PImage bosscharge = loadImage("charge"+bosschargeno+".png");
+ image(bosscharge, boss.getx(), boss.gety());
+ if (start - bosschargedelay > 50) {
+ if (rewind) {
+ if (bosschargeno == 0) {
+ rewind = false;
+ bosschargeno++;
+ }
+ bosschargeno--;
+ } else {
+ if (bosschargeno == 3) {
+ rewind = true;
+ bosschargeno--;
+ }
+ bosschargeno++;
+ }
+ bosschargedelay = millis();
+ }
+ }
+ if ((start-timer) > 3000) {
+ if (bossprojectile || projectiles.size() > 0) {
+ PImage bossproj;
+ if (boss.getside()) {
+ if (countdown > 1) {
+ bossproj = loadImage("projectiler2.png");
+ } else if (countdown > 0) {
+ bossproj = loadImage("projectiler8.png");
+ } else {
+ bossproj = loadImage("projectiler14.png");
+ }
+ } else {
+ if (countdown > 1) {
+ bossproj = loadImage("projectilel2.png");
+ } else if (countdown > 0) {
+ bossproj = loadImage("projectilel8.png");
+ } else {
+ bossproj = loadImage("projectilel14.png");
+ }
+ }
+ image(bossproj, boss.getx(), boss.gety());
+ if (countdown == 3) {
+ projectiles.add(new Projectile(boss.getx(), boss.gety()+20, boss.getside()));
+ timer2 = millis();
+ countdown--;
+ } else if (countdown > 0 && start-timer2 > 1000) {
+ projectiles.add(new Projectile(boss.getx(), boss.gety()+20, boss.getside()));
+ timer2 = millis();
+ countdown--;
+ } else if (countdown == 0 && projectiles.size() == 0) {
+ bossprojectile = false;
+ countdown = 3;
+ changeprojectile = false;
+ timer = millis();
+ }
+ if (projectiles.size() > 0) {
+ for (int i = 0; i<projectiles.size (); i++) {
+ //ellipse(projectiles.get(i).getx(), projectiles.get(i).gety(), 30, 15);
+ if (!projectiles.get(i).getside()) {
+ PImage fire = loadImage("firel.png");
+ image(fire, projectiles.get(i).getx(), projectiles.get(i).gety());
+ projectiles.get(i).setx(projectiles.get(i).getx()+10);
+ } else {
+ PImage fire = loadImage("firer.png");
+ image(fire, projectiles.get(i).getx(), projectiles.get(i).gety());
+ projectiles.get(i).setx(projectiles.get(i).getx()-10);
+ }
+ if (projectiles.get(i).getx() > 700 || projectiles.get(i).getx() < 100) {
+ projectiles.remove(i);
+ }
+ }
+ }
+ } else if (boss.getx() == 700 || boss.getx() == 100) {
+ int action, action2, action3;
+ if (counter < 5 && counter2 < 7) {
+ action = chance.nextInt(5-counter);
+ action2 = chance.nextInt(7-counter2);
+ action3 = chance.nextInt(9-counter3);
+ } else if (counter < 9) {
+ action = 0;
+ action2 = 0;
+ action3 = chance.nextInt(9-counter3);
+ } else {
+ action3 = 0;
+ action = 4;
+ action2 = 6;
+ }
+ if (action3 == 0) {
+ bossprojectile = true;
+ counter3 = 0;
+ } else if (action2 == 0) {
+ bossair = true;
+ counter2 = 0;
+ } else if (action == 0) {
+ bossjump = true;
+ counter = 0;
+ }
+ }
+ if (!bossprojectile) {
+ if (boss.getside()) {
+ boss.setx(boss.getx()-10);
+ } else {
+ boss.setx(boss.getx()+10);
+ }
+ }
+ if (bossair) {
+ boss.sety(300);
+ }
+ if (bossjump) {
+ if (boss.gety() == 350) {
+ boss.setspd(40);
+ } else {
+ boss.setspd(boss.getspd() - 4);
+ }
+ 
+ PImage jumping;
+ if (boss.getside()) {
+ if (boss.getspd() == 40) {
+ jumping = loadImage("jumpr.png");
+ } else if (boss.getspd() < 40 && boss.getspd() >= 32) {
+ jumping = loadImage("jumpr0.png");
+ } else if (boss.getspd() < 32 && boss.getspd() >= 24) {
+ jumping = loadImage("jumpr1.png");
+ } else if (boss.getspd() < 24 && boss.getspd() >= 16) {
+ jumping = loadImage("jumpr2.png");
+ } else if (boss.getspd() < 16 && boss.getspd() >= 8) {
+ jumping = loadImage("jumpr3.png");
+ } else if (boss.getspd() < 8 && boss.getspd() >= 0) {
+ jumping = loadImage("jumpr4.png");
+ } else if (boss.getspd() < 0 && boss.getspd() >= -8) {
+ jumping = loadImage("jumpr5.png");
+ } else if (boss.getspd() < -8 && boss.getspd() >= -16) {
+ jumping = loadImage("jumpr6.png");
+ } else if (boss.getspd() < -16 && boss.getspd() >= -24) {
+ jumping = loadImage("jumpr7.png");
+ } else if (boss.getspd() < -24 && boss.getspd() >= -32) {
+ jumping = loadImage("jumpr8.png");
+ } else if (boss.getspd() < -32 && boss.getspd() > -40) {
+ jumping = loadImage("jumpr9.png");
+ } else {
+ jumping = loadImage("jumpr10.png");
+ }
+ <<<<<<< HEAD
+ if (projectiles.get(i).getx() > 790 || projectiles.get(i).getx() < 10) {
+ projectiles.remove(i);
+ =======
+ } else {
+ if (boss.getspd() == 40) {
+ jumping = loadImage("jumpl.png");
+ } else if (boss.getspd() < 40 && boss.getspd() >= 32) {
+ jumping = loadImage("jumpl0.png");
+ } else if (boss.getspd() < 32 && boss.getspd() >= 24) {
+ jumping = loadImage("jumpl1.png");
+ } else if (boss.getspd() < 24 && boss.getspd() >= 16) {
+ jumping = loadImage("jumpl2.png");
+ } else if (boss.getspd() < 16 && boss.getspd() >= 8) {
+ jumping = loadImage("jumpl3.png");
+ } else if (boss.getspd() < 8 && boss.getspd() >= 0) {
+ jumping = loadImage("jumpl4.png");
+ } else if (boss.getspd() < 0 && boss.getspd() >= -8) {
+ jumping = loadImage("jumpl5.png");
+ } else if (boss.getspd() < -8 && boss.getspd() >= -16) {
+ jumping = loadImage("jumpl6.png");
+ } else if (boss.getspd() < -16 && boss.getspd() >= -24) {
+ jumping = loadImage("jumpl7.png");
+ } else if (boss.getspd() < -24 && boss.getspd() >= -32) {
+ jumping = loadImage("jumpl8.png");
+ } else if (boss.getspd() < -32 && boss.getspd() > -40) {
+ jumping = loadImage("jumpl9.png");
+ } else {
+ jumping = loadImage("jumpl10.png");
+ >>>>>>> origin/Boss2
+ }
+ }
+ image(jumping, boss.getx(), boss.gety());
+ 
+ boss.sety(boss.gety()-boss.getspd());
+ } else if (!bossprojectile) {
+ PImage dash;
+ if (boss.getside()) {
+ dash = loadImage("dashright.png");
+ } else {
+ dash = loadImage("dashleft.png");
+ }
+ image(dash, boss.getx(), boss.gety());
+ }
+ if (boss.getx() == 100 && boss.getside()) {
+ boss.sety(350);
+ boss.switchside();
+ timer = millis();
+ counter++;
+ counter2++;
+ counter3++;
+ bossair = false;
+ bossjump = false;
+ bossprojectile = false;
+ boss.setspd(0);
+ bossidleno = 0;
+ bosschargeno = 0;
+ } else if (boss.getx() == 700 && !boss.getside()) {
+ boss.sety(350);
+ boss.switchside();
+ timer = millis();
+ counter++;
+ counter2++;
+ counter3++;
+ bossair = false;
+ bossjump = false;
+ bossprojectile = false;
+ boss.setspd(0);
+ bossidleno = 0;
+ bosschargeno = 0;
+ }
+ }
+ } else if (stage == 2) {
+ if (start - timer < 2000) {
+ PImage bossidle = loadImage("b2idle.png");
+ image(bossidle, boss.getx(), boss.gety());
+ }
+ if (start - timer > 2000 && start - timer < 3000) {
+ PImage bosscharge = loadImage("charge"+bosschargeno+".png");
+ image(bosscharge, boss.getx(), boss.gety());
+ if (start - bosschargedelay > 50) {
+ bosschargeno++;
+ bosschargedelay = millis();
+ }
+ }
+ <<<<<<< HEAD
+ if (bossjump) {
+ if (boss.gety() == 350) {
+ boss.setspd(40);
+ } else {
+ boss.setspd(boss.getspd() - 4);
+ }
+ 
+ PImage jumping;
+ if (boss.getside()) {
+ if (boss.getspd() == 40) {
+ jumping = loadImage("jumpr.png");
+ } else if (boss.getspd() < 40 && boss.getspd() >= 32) {
+ jumping = loadImage("jumpr0.png");
+ } else if (boss.getspd() < 32 && boss.getspd() >= 24) {
+ jumping = loadImage("jumpr1.png");
+ } else if (boss.getspd() < 24 && boss.getspd() >= 16) {
+ jumping = loadImage("jumpr2.png");
+ } else if (boss.getspd() < 16 && boss.getspd() >= 8) {
+ jumping = loadImage("jumpr3.png");
+ } else if (boss.getspd() < 8 && boss.getspd() >= 0) {
+ jumping = loadImage("jumpr4.png");
+ } else if (boss.getspd() < 0 && boss.getspd() >= -8) {
+ jumping = loadImage("jumpr5.png");
+ } else if (boss.getspd() < -8 && boss.getspd() >= -16) {
+ jumping = loadImage("jumpr6.png");
+ } else if (boss.getspd() < -16 && boss.getspd() >= -24) {
+ jumping = loadImage("jumpr7.png");
+ } else if (boss.getspd() < -24 && boss.getspd() >= -32) {
+ jumping = loadImage("jumpr8.png");
+ } else if (boss.getspd() < -32 && boss.getspd() > -40) {
+ jumping = loadImage("jumpr9.png");
+ } else {
+ jumping = loadImage("jumpr10.png");
+ }
+ } else {
+ if (boss.getspd() == 40) {
+ jumping = loadImage("jumpl.png");
+ } else if (boss.getspd() < 40 && boss.getspd() >= 32) {
+ jumping = loadImage("jumpl0.png");
+ } else if (boss.getspd() < 32 && boss.getspd() >= 24) {
+ jumping = loadImage("jumpl1.png");
+ } else if (boss.getspd() < 24 && boss.getspd() >= 16) {
+ jumping = loadImage("jumpl2.png");
+ } else if (boss.getspd() < 16 && boss.getspd() >= 8) {
+ jumping = loadImage("jumpl3.png");
+ } else if (boss.getspd() < 8 && boss.getspd() >= 0) {
+ jumping = loadImage("jumpl4.png");
+ } else if (boss.getspd() < 0 && boss.getspd() >= -8) {
+ jumping = loadImage("jumpl5.png");
+ } else if (boss.getspd() < -8 && boss.getspd() >= -16) {
+ jumping = loadImage("jumpl6.png");
+ } else if (boss.getspd() < -16 && boss.getspd() >= -24) {
+ jumping = loadImage("jumpl7.png");
+ } else if (boss.getspd() < -24 && boss.getspd() >= -32) {
+ jumping = loadImage("jumpl8.png");
+ } else if (boss.getspd() < -32 && boss.getspd() > -40) {
+ jumping = loadImage("jumpl9.png");
+ } else {
+ jumping = loadImage("jumpl10.png");
+ }
+ }
+ image(jumping, boss.getx(), boss.gety());
+ 
+ boss.sety(boss.gety()-boss.getspd());
+ } else if (!bossprojectile) {
+ PImage dash;
+ if (boss.getside()) {
+ dash = loadImage("dashright.png");
+ } else {
+ dash = loadImage("dashleft.png");
+ =======
+ if (bossprojectile) {
+ boss.setx(400);
+ PImage bossproj = loadImage("b2proj"+bossprojimg+".png");
+ if (bossprojimg < 2) {
+ bossprojimg++;
+ }
+ if (lockon == 0) {
+ lockon = theplayer.getx();
+ delay = millis();
+ }
+ if (countdown >= 1 && start-delay > 700) {
+ projectiles.add(new Projectile(lockon, 320));
+ countdown--;
+ lockon = 0;
+ }
+ for (int i = 0; i<projectiles.size (); i++) {
+ PImage bossprome = loadImage("b2proj.png");
+ image(bossprome, projectiles.get(i).getx(), projectiles.get(i).gety());
+ projectiles.get(i).sety(projectiles.get(i).gety() - 3);
+ if (projectiles.get(i).gety() < 150) {
+ projectiles.remove(i);
+ }
+ }
+ if (countdown == 0 && (projectiles.size() == 0)) {
+ lockon = 0;
+ timer = millis();
+ countdown = 3;
+ boss.setx(700);
+ bossprojimg = 0;
+ >>>>>>> origin/Boss2
+ }
+ counter++;
+ counter2++;
+ counter4++;
+ } else if (bossair) {
+ if (lockon == 0) {
+ lockon = theplayer.getx() + 100;
+ } else {
+ if (boss.getx() > lockon) {
+ boss.setx(boss.getx()-10);
+ PImage bosschar = loadImage("b2charge13.png");
+ image(bosschar, boss.getx(), boss.gety());
+ } else if (boss.gety() > 150) {
+ PImage bossup = loadImage("b2air"+bossairimg+".png");
+ image(bossup, boss.getx(), boss.gety());
+ if (bossairimg < 5) {
+ bossairimg++;
+ }
+ boss.setx(boss.getx()-10);
+ boss.sety(boss.gety()-15);
+ } else {
+ lockon = 0;
+ bossairimg = 0;
+ boss.setx(700);
+ boss.sety(350);
+ timer = millis();
+ }
+ }
+ counter++;
+ counter3++;
+ counter4++;
+ } else if (bossdive) {
+ if (lockon == 0) {
+ lockon = theplayer.getx();
+ boss.setx(lockon);
+ boss.sety(150);
+ }
+ if (boss.gety() < 350 && !enddive) {
+ boss.sety(boss.gety()+10);
+ PImage bossdive1 = loadImage("b2dive"+(0+bossdiveimg)+".png");
+ image(bossdive1, boss.getx(), boss.gety());
+ if (bossdiveimg < 3) {
+ bossdiveimg++;
+ }
+ } else if (boss.gety() == 350) {
+ PImage divemid = loadImage("b2dive4.png");
+ image(divemid, boss.getx(), boss.gety());
+ bossdiveimg = 0;
+ enddive = true;
+ boss.sety(340);
+ } else if (enddive && boss.gety() > 150) {
+ boss.sety(boss.gety()-10);
+ PImage bossdive2 = loadImage("b2dive"+(5+bossdiveimg)+".png");
+ image(bossdive2, boss.getx, boss.gety());
+ if (bossdiveimg < 3) {
+ bossdiveimg++;
+ }
+ } else if (boss.gety() == 150 && enddive) {
+ lockon = 0;
+ timer = millis();
+ boss.setx(700);
+ boss.sety(350);
+ enddive = false;
+ bossdiveimg = 0;
+ }
+ counter++;
+ counter2++;
+ counter3++;
+ } else if (bossjump) { //not actually a jumping attack
+ if (lockon == 0) {
+ lockon = theplayer.getx();
+ } else {
+ if (boss.getx() > lockon) {
+ boss.setx(boss.getx()-10);
+ atktimer = millis();
+ PImage bossjump1 = loadImage("b2jump"+bossjumpimg+".png");
+ image(bossjump1, boss.getx(), boss.gety());
+ if (bossjumpimg < 2) {
+ bossjumpimg++;
+ }
+ } else {
+ PImage bossjump2 = loadImage("b2jump"+bossjumpimg+".png");
+ image(bossjump2, boss.getx(), boss.gety());
+ if (bossjumpimg < 9) {
+ bossjumpimg++;
+ }
+ if (start - atktimer > 1000) {
+ lockon = 0;
+ boss.setx(700);
+ boss.sety(350);
+ timer = millis();
+ }
+ }
+ }
+ counter2++;
+ counter3++;
+ counter4++;
+ }
+ 
+ int action, action2, action3, action4;
+ if (counter < 5 && counter2 < 7 && counter3 < 9) {
+ action = chance.nextInt(5-counter);
+ action2 = chance.nextInt(7-counter2);
+ action3 = chance.nextInt(9-counter3);
+ action4 = chance.nextInt(11-counter4);
+ } else if (counter4 > 11) {
+ action = 0;
+ action2 = 0;
+ action3 = 0;
+ action4 = 0;
+ } else if (counter3 > 9) {
+ action3 = 0;
+ action = 4;
+ action2 = 6;
+ action4 = 3;
+ } else if (counter2 > 7) {
+ action2 = 0;
+ action4 = 4;
+ action = 6;
+ action3 = 3;
+ } else {
+ action = 0;
+ action2 = 4;
+ action3 = 5;
+ action4 = 6;
+ }
+ if (action4 == 0) {
+ bossdive = true;
+ counter4 = 0;
+ } else if (action3 == 0) {
+ bossprojectile = true;
+ counter3 = 0;
+ } else if (action2 == 0) {
+ bossair = true;
+ counter2 = 0;
+ } else if (action == 0) {
+ bossjump = true;
+ counter = 0;
+ }
+ }
+ }
+ */
 void displayBoss() {
   fill(0);
   rect(750, 10, 35, boss.getHP() * 15 + 10);
@@ -1470,7 +1514,7 @@ void displayBoss() {
   int start = millis();
   //println(start-timer);
   if (stage == 1) {
-    
+
     if (start-timer < 2000) {
       if (boss.getside()) {
         PImage bossidle = loadImage("idler"+bossidleno+".png");
@@ -1665,7 +1709,6 @@ void displayBoss() {
         image(jumping, boss.getx(), boss.gety());
 
         boss.sety(boss.gety()-boss.getspd());
-        
       } else if (!bossprojectile) {
         PImage dash;
         if (boss.getside()) {
@@ -1703,7 +1746,6 @@ void displayBoss() {
         bosschargeno = 0;
       }
     }
-    
   } else if (stage == 2) {
     if (start - timer < 2000) {
       PImage bossidle = loadImage("b2idle.png");
