@@ -5,7 +5,7 @@ Group Name: Megaman CS
 Updates:    
 - Done!    
 
-To Play: Open the Final folder, then open Final.pde    
+To Play: Open the Final folder, then open Final.pde, then run the file        
 
 
 
